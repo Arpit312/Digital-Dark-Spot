@@ -1,0 +1,53 @@
+{
+  "topic_type": "scholarship",
+  "attributes": [
+    {
+      "name": "deadline",
+      "description": "Last date or deadline to apply, submit application or register",
+      "importance": 1.0,
+      "half_life_days": 30
+    },
+    {
+      "name": "eligibility",
+      "description": "Eligibility criteria, family income ceiling, minimum marks, caste, category or resident requirement",
+      "importance": 0.9,
+      "half_life_days": 365
+    },
+    {
+      "name": "documents",
+      "description": "Required documents such as income certificate, marksheet, caste certificate, domicile, bank passbook, Aadhaar",
+      "importance": 0.9,
+      "half_life_days": 365
+    },
+    {
+      "name": "amount",
+      "description": "Scholarship benefit amount, tuition fee waiver, maintenance allowance, or financial grant details",
+      "importance": 0.8,
+      "half_life_days": 365
+    },
+    {
+      "name": "apply_link",
+      "description": "Official application portal URL, login link, or official apply process steps",
+      "importance": 0.8,
+      "half_life_days": 180
+    },
+    {
+      "name": "renewal",
+      "description": "Renewal policy, conditions for continuing scholarship in next academic year, required passing grade",
+      "importance": 0.7,
+      "half_life_days": 365
+    },
+    {
+      "name": "selection_process",
+      "description": "Selection criteria, merit list preparation, verification process by institute or state authority",
+      "importance": 0.6,
+      "half_life_days": 365
+    },
+    {
+      "name": "helpline",
+      "description": "Official contact email, toll-free helpline number, support desk details",
+      "importance": 0.3,
+      "half_life_days": 730
+    }
+  ]
+}

@@ -1,0 +1,47 @@
+{
+  "topic_type": "admission",
+  "attributes": [
+    {
+      "name": "deadline",
+      "description": "Last date for registration, choice filling, document upload or fee payment",
+      "importance": 1.0,
+      "half_life_days": 30
+    },
+    {
+      "name": "eligibility",
+      "description": "Academic qualification, minimum cutoff percentage, qualifying exam score, age limit",
+      "importance": 0.9,
+      "half_life_days": 180
+    },
+    {
+      "name": "fee_structure",
+      "description": "Tuition fees, hostel charges, caution deposit, refund policy",
+      "importance": 0.8,
+      "half_life_days": 365
+    },
+    {
+      "name": "counselling_rounds",
+      "description": "Seat allotment schedule, counselling rounds, spot round date",
+      "importance": 0.8,
+      "half_life_days": 45
+    },
+    {
+      "name": "documents",
+      "description": "Required original certificates, transfer certificate, migration, category certificate",
+      "importance": 0.8,
+      "half_life_days": 180
+    },
+    {
+      "name": "official_portal",
+      "description": "Official admission portal link and candidate login page",
+      "importance": 0.7,
+      "half_life_days": 180
+    },
+    {
+      "name": "helpline",
+      "description": "Admission office contact number, email, campus helpdesk",
+      "importance": 0.4,
+      "half_life_days": 365
+    }
+  ]
+}

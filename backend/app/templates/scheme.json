@@ -1,0 +1,47 @@
+{
+  "topic_type": "scheme",
+  "attributes": [
+    {
+      "name": "benefits",
+      "description": "Financial assistance, subsidy, pension, loan or direct benefit transfer given under the scheme",
+      "importance": 1.0,
+      "half_life_days": 365
+    },
+    {
+      "name": "eligibility",
+      "description": "Target beneficiary eligibility, age limit, land holding, income limit, gender, occupation criteria",
+      "importance": 0.9,
+      "half_life_days": 365
+    },
+    {
+      "name": "documents",
+      "description": "Required documents like Ration card, Aadhaar, Land records, Bank account, Domicile certificate",
+      "importance": 0.9,
+      "half_life_days": 365
+    },
+    {
+      "name": "apply_process",
+      "description": "Where to apply: online portal, CSC centre, block office, or mobile app",
+      "importance": 0.8,
+      "half_life_days": 180
+    },
+    {
+      "name": "official_link",
+      "description": "Official government scheme portal or department URL",
+      "importance": 0.8,
+      "half_life_days": 180
+    },
+    {
+      "name": "nodal_agency",
+      "description": "Implementing ministry, department, or state nodal officer responsible",
+      "importance": 0.6,
+      "half_life_days": 730
+    },
+    {
+      "name": "helpline",
+      "description": "Toll-free customer care number, grievance redressal link, or official helpdesk email",
+      "importance": 0.4,
+      "half_life_days": 730
+    }
+  ]
+}
