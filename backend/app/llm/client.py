@@ -14,36 +14,37 @@ class LLMClient:
     async def generate_json(self, prompt: str, schema_desc: str = "", temperature: float = 0.1) -> Optional[Dict[str, Any]]:
         """
         Generate structured JSON from LLM.
-        Primary: Gemini. Fallback: Groq.
+        Primary: Gemini (gemini-2.5-flash). Fallback: Groq (openai/gpt-oss-120b).
         """
         # Try Gemini first
         if self.gemini_key:
-            try:
-                res = await self._call_gemini_json(prompt, schema_desc, temperature)
-                if res is not None:
-                    return res
-            except Exception as e:
-                logger.warning(f"Gemini call failed: {e}. Falling back to Groq...")
+            for model_name in ["gemini-2.5-flash", "gemini-flash-latest", "gemini-2.5-flash-lite"]:
+                try:
+                    res = await self._call_gemini_json(prompt, schema_desc, temperature, model_name)
+                    if res is not None:
+                        return res
+                except Exception as e:
+                    logger.warning(f"Gemini {model_name} call failed: {e}. Trying next...")
 
         # Fallback to Groq
         if self.groq_key:
-            try:
-                res = await self._call_groq_json(prompt, schema_desc, temperature)
-                if res is not None:
-                    return res
-            except Exception as e:
-                logger.error(f"Groq call failed: {e}")
+            for model_name in ["openai/gpt-oss-120b", "openai/gpt-oss-20b", "qwen/qwen3.8-27b"]:
+                try:
+                    res = await self._call_groq_json(prompt, schema_desc, temperature, model_name)
+                    if res is not None:
+                        return res
+                except Exception as e:
+                    logger.warning(f"Groq {model_name} call failed: {e}. Trying next...")
 
-        logger.error("No working LLM available or both providers failed.")
+        logger.error("No working LLM available or all providers failed.")
         return None
 
-    async def _call_gemini_json(self, prompt: str, schema_desc: str, temperature: float) -> Optional[Dict[str, Any]]:
+    async def _call_gemini_json(self, prompt: str, schema_desc: str, temperature: float, model_name: str) -> Optional[Dict[str, Any]]:
         import google.generativeai as genai
         genai.configure(api_key=self.gemini_key)
         
-        # Use gemini-1.5-flash for speed and free tier limits
         model = genai.GenerativeModel(
-            model_name="gemini-1.5-flash",
+            model_name=model_name,
             generation_config={
                 "response_mime_type": "application/json",
                 "temperature": temperature
@@ -52,7 +53,6 @@ class LLMClient:
         
         full_prompt = f"{prompt}\n\nYou MUST return valid JSON adhering strictly to: {schema_desc}" if schema_desc else prompt
         
-        # Run sync API call in threadpool
         loop = asyncio.get_event_loop()
         response = await loop.run_in_executor(None, lambda: model.generate_content(full_prompt))
         
@@ -65,7 +65,7 @@ class LLMClient:
             return json.loads(cleaned.strip())
         return None
 
-    async def _call_groq_json(self, prompt: str, schema_desc: str, temperature: float) -> Optional[Dict[str, Any]]:
+    async def _call_groq_json(self, prompt: str, schema_desc: str, temperature: float, model_name: str) -> Optional[Dict[str, Any]]:
         from groq import Groq
         client = Groq(api_key=self.groq_key)
         
@@ -79,7 +79,7 @@ class LLMClient:
                     {"role": "system", "content": "You are a precise data extractor that outputs only valid JSON."},
                     {"role": "user", "content": full_prompt}
                 ],
-                model="llama-3.1-70b-versatile",
+                model=model_name,
                 response_format={"type": "json_object"},
                 temperature=temperature
             )

@@ -1,5 +1,5 @@
 import logging
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Optional, Set
 from backend.app.algorithms.conflict_math import check_numeric_or_date_conflict, check_jaccard_set_conflict
 
 logger = logging.getLogger(__name__)
@@ -17,7 +17,7 @@ class ConflictDetectorAgent:
         F6 Conflict Detector:
         Groups claims by attribute (blocking).
         Uses deterministic code for numbers, dates, amounts, and lists.
-        Generates conflict findings with both source quotes side-by-side.
+        Generates clean, deduplicated conflict findings with both source quotes side-by-side.
         """
         expected_attrs = template.get("attributes", [])
         attr_weights = {a["name"]: a.get("importance", 1.0) for a in expected_attrs}
@@ -36,6 +36,8 @@ class ConflictDetectorAgent:
                 continue
 
             w_a = attr_weights.get(attr, 0.8)
+            seen_value_pairs: Set[str] = set()
+            attr_conflicts: List[Dict[str, Any]] = []
 
             # Compare pairs across different sources
             for i in range(len(attr_claims)):
@@ -47,8 +49,18 @@ class ConflictDetectorAgent:
                     if c1.get("source_id") == c2.get("source_id") and c1.get("source_url") == c2.get("source_url"):
                         continue
 
-                    val1 = c1.get("value_norm", c1.get("value_raw", ""))
-                    val2 = c2.get("value_norm", c2.get("value_raw", ""))
+                    val1 = str(c1.get("value_norm", c1.get("value_raw", ""))).strip()
+                    val2 = str(c2.get("value_norm", c2.get("value_raw", ""))).strip()
+                    
+                    if not val1 or not val2 or val1.lower() == val2.lower():
+                        continue
+
+                    # Deduplication key for pair
+                    pair_key = tuple(sorted([val1.lower(), val2.lower()]))
+                    if pair_key in seen_value_pairs:
+                        continue
+                    seen_value_pairs.add(pair_key)
+
                     t1 = c1.get("source_trust", 0.5)
                     t2 = c2.get("source_trust", 0.5)
 
@@ -66,7 +78,7 @@ class ConflictDetectorAgent:
                                 if t2 > t1 else "Both sources have equal trust rating"
                             )
                             
-                            conflict_findings.append({
+                            attr_conflicts.append({
                                 "type": "conflict",
                                 "attribute": attr,
                                 "statement": f"Required documents list differs between sources. Discrepancy in: {', '.join(set_res['symmetric_difference'])}.",
@@ -96,7 +108,7 @@ class ConflictDetectorAgent:
                     else:
                         num_res = check_numeric_or_date_conflict(val1, val2, attr_weight=w_a, trust1=t1, trust2=t2)
                         if num_res and num_res["is_conflict"]:
-                            conflict_findings.append({
+                            attr_conflicts.append({
                                 "type": "conflict",
                                 "attribute": attr,
                                 "statement": f"Different values reported for {attr.replace('_', ' ')}: '{c1.get('value_raw')}' vs '{c2.get('value_raw')}'.",
@@ -121,6 +133,10 @@ class ConflictDetectorAgent:
                                 "severity": num_res["severity"],
                                 "resolution_hint": num_res["resolution_hint"]
                             })
+
+            # Sort by severity descending and take top 3 per attribute
+            attr_conflicts.sort(key=lambda x: x.get("severity", 0), reverse=True)
+            conflict_findings.extend(attr_conflicts[:3])
 
         return conflict_findings
 
