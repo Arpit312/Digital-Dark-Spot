@@ -16,7 +16,12 @@ import {
   ListFilter,
   Plus,
   RefreshCw,
-  FileText
+  FileText,
+  Radio,
+  Globe,
+  TrendingDown,
+  Activity,
+  Maximize2
 } from 'lucide-react';
 import { Finding, AnalysisResult, ChecklistItem } from '../lib/types';
 import { streamAnalyzeTopic } from '../lib/api';
@@ -270,78 +275,91 @@ export default function HomePage() {
   });
 
   return (
-    <div className="flex-1 flex flex-col bg-[#0F0F10] text-[#F4F4F5] bg-dot-grid">
+    <div className="flex-1 flex flex-col text-[#F4F4F5] relative">
       
-      {/* Live Scrolling Audit Ticker */}
+      {/* Real Continuous Sliding Tickers */}
       <AnimatedTicker />
 
       {/* Main Workspace Container */}
       <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 py-8 sm:py-12 space-y-10">
 
         {/* Hero & Query Input Section */}
-        <div className="max-w-3xl mx-auto text-center space-y-4">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#18181A] border border-[#2C2C30] text-xs text-[#9A9AA2]">
-            <Sparkles className="w-3.5 h-3.5 text-white" strokeWidth={1.5} />
-            <span>Multi-Agent AI Information Gap & Conflict Auditor</span>
+        <div className="max-w-3xl mx-auto text-center space-y-5 relative">
+          
+          {/* Subtle Ambient Radial Light behind Hero */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[300px] bg-white/[0.03] blur-[120px] pointer-events-none" />
+
+          {/* Top Protocol Pill */}
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#141416]/90 border border-[#27272A] text-xs text-[#A1A1AA] shadow-xl backdrop-blur-md">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+            <span className="font-mono-code text-[11px] text-[#F4F4F5]">DARKS-POT MULTI-AGENT ENGINE</span>
+            <span className="text-[#3F3F46]">•</span>
+            <span className="text-white font-medium">18 Deterministic Algorithms</span>
           </div>
 
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-white leading-tight">
+          <h1 className="text-3xl sm:text-5xl font-black tracking-tight text-white leading-[1.12]">
             Jahan jaankari mein andhera hai, <br className="hidden sm:inline" />
-            <span className="text-[#9A9AA2] font-normal">wahan roshni.</span>
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-[#E4E4E7] to-[#71717A]">
+              wahan roshni.
+            </span>
           </h1>
 
-          <p className="text-sm text-[#9A9AA2] max-w-xl mx-auto leading-relaxed">
-            Enter any scholarship, admission, or government scheme. Our autonomous multi-agent pipeline audits multiple sources simultaneously to find missing gaps, conflicting rules, and outdated circulars.
+          <p className="text-sm sm:text-base text-[#A1A1AA] max-w-xl mx-auto leading-relaxed">
+            Enter any scholarship, admission, or government scheme. Our autonomous multi-agent pipeline audits multiple sources simultaneously to identify missing gaps, conflicting rules, and outdated circulars.
           </p>
 
-          {/* Search Box Card */}
-          <div className="pt-2">
-            <div className="bg-[#18181A] p-2 rounded-2xl border border-[#2C2C30] shadow-2xl focus-within:border-[#3E3E44] transition-all">
+          {/* Interactive Search Console HUD */}
+          <div className="pt-2 relative">
+            <div className="p-2 sm:p-2.5 rounded-2xl bg-[#121214]/90 border border-[#27272A] shadow-2xl backdrop-blur-xl focus-within:border-white/40 focus-within:shadow-[0_0_40px_rgba(255,255,255,0.06)] transition-all duration-300">
+              
               <div className="flex items-center gap-3 px-3 py-1.5">
-                <Search className="w-5 h-5 text-[#9A9AA2]" strokeWidth={1.5} />
+                <Search className="w-5 h-5 text-[#A1A1AA]" strokeWidth={1.5} />
                 <input
                   type="text"
                   placeholder="Ask a question or enter a policy topic (e.g., NSP Post-Matric Scholarship rules)..."
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleStartAnalysis()}
-                  className="w-full bg-transparent text-sm sm:text-base text-[#F4F4F5] placeholder-[#6B6B76] focus:outline-none"
+                  className="w-full bg-transparent text-sm sm:text-base text-[#F4F4F5] placeholder-[#71717A] focus:outline-none"
                 />
                 <button
                   onClick={() => handleStartAnalysis()}
                   disabled={isAnalyzing}
-                  className="h-10 px-5 rounded-xl bg-white hover:bg-[#E4E4E7] text-[#0F0F10] text-sm font-semibold flex items-center gap-2 transition-all flex-shrink-0 disabled:opacity-50"
+                  className="h-10 px-5 rounded-xl bg-white hover:bg-[#E4E4E7] text-[#0A0A0B] text-xs sm:text-sm font-bold flex items-center gap-2 transition-all flex-shrink-0 disabled:opacity-50 cursor-pointer shadow-lg"
                 >
                   {isAnalyzing ? (
                     <>
-                      <RefreshCw className="w-4 h-4 animate-spin" strokeWidth={1.5} />
+                      <RefreshCw className="w-4 h-4 animate-spin" strokeWidth={2} />
                       <span>Auditing...</span>
                     </>
                   ) : (
                     <>
                       <span>Analyze</span>
-                      <ArrowRight className="w-4 h-4" strokeWidth={1.5} />
+                      <ArrowRight className="w-4 h-4" strokeWidth={2} />
                     </>
                   )}
                 </button>
               </div>
 
               {/* Optional Custom URLs toggle */}
-              <div className="px-3 pt-2 pb-1 flex items-center justify-between text-xs text-[#6B6B76] border-t border-[#232326] mt-2">
+              <div className="px-3 pt-2.5 pb-1 flex items-center justify-between text-xs text-[#71717A] border-t border-[#27272A]/70 mt-2">
                 <button
                   type="button"
                   onClick={() => setShowUrlField(!showUrlField)}
-                  className="hover:text-[#9A9AA2] flex items-center gap-1 transition-colors"
+                  className="hover:text-white flex items-center gap-1.5 transition-colors cursor-pointer"
                 >
-                  <Plus className="w-3.5 h-3.5" strokeWidth={1.5} />
-                  <span>{showUrlField ? 'Hide URL inputs' : '+ Add specific URLs or PDFs'}</span>
+                  <Plus className="w-3.5 h-3.5 text-[#A1A1AA]" strokeWidth={1.5} />
+                  <span>{showUrlField ? 'Hide custom URL filters' : '+ Ingest specific portal URLs / PDFs'}</span>
                 </button>
-                <span>Permitted real search active</span>
+                <div className="flex items-center gap-2 font-mono-code text-[11px] text-[#A1A1AA]">
+                  <Radio className="w-3 h-3 text-emerald-400" />
+                  <span>Tavily Live Web Scraper Active</span>
+                </div>
               </div>
 
               {/* Expanded URL Inputs */}
               {showUrlField && (
-                <div className="p-3 bg-[#0F0F10] rounded-xl border border-[#232326] mt-2 text-left space-y-2">
+                <div className="p-3 bg-[#0A0A0B] rounded-xl border border-[#27272A] mt-2 text-left space-y-2">
                   <div className="flex gap-2">
                     <input
                       type="url"
@@ -349,11 +367,11 @@ export default function HomePage() {
                       value={urlInput}
                       onChange={(e) => setUrlInput(e.target.value)}
                       onKeyDown={(e) => e.key === 'Enter' && addUrl()}
-                      className="flex-1 bg-[#18181A] border border-[#2C2C30] rounded-lg px-3 py-1.5 text-xs text-[#F4F4F5] placeholder-[#6B6B76] focus:outline-none"
+                      className="flex-1 bg-[#121214] border border-[#27272A] rounded-lg px-3 py-1.5 text-xs text-[#F4F4F5] placeholder-[#71717A] focus:outline-none focus:border-white/40"
                     />
                     <button
                       onClick={addUrl}
-                      className="px-3 py-1.5 rounded-lg bg-[#2C2C30] hover:bg-[#3E3E44] text-xs text-white"
+                      className="px-3 py-1.5 rounded-lg bg-[#27272A] hover:bg-[#3F3F46] text-xs text-white cursor-pointer"
                     >
                       Add
                     </button>
@@ -362,9 +380,9 @@ export default function HomePage() {
                   {customUrls.length > 0 && (
                     <div className="flex flex-wrap gap-1.5 pt-1">
                       {customUrls.map((u, i) => (
-                        <span key={i} className="px-2 py-0.5 rounded bg-[#18181A] border border-[#2C2C30] text-[11px] text-[#9A9AA2] flex items-center gap-1.5">
+                        <span key={i} className="px-2 py-0.5 rounded bg-[#18181B] border border-[#27272A] text-[11px] text-[#A1A1AA] flex items-center gap-1.5">
                           <span className="truncate max-w-[200px]">{u}</span>
-                          <button onClick={() => removeUrl(i)} className="text-[#6B6B76] hover:text-white">×</button>
+                          <button onClick={() => removeUrl(i)} className="text-[#71717A] hover:text-white">×</button>
                         </span>
                       ))}
                     </div>
@@ -375,7 +393,7 @@ export default function HomePage() {
 
             {/* Quick Topic Chips */}
             <div className="flex flex-wrap items-center justify-center gap-2 mt-4">
-              <span className="text-xs text-[#6B6B76]">Try audited examples:</span>
+              <span className="text-xs text-[#71717A]">Try real benchmarks:</span>
               {exampleTopics.map((top, idx) => (
                 <button
                   key={idx}
@@ -383,7 +401,7 @@ export default function HomePage() {
                     setQuery(top);
                     handleStartAnalysis(top);
                   }}
-                  className="px-3 py-1 rounded-full bg-[#18181A] hover:bg-[#1F1F22] border border-[#2C2C30] hover:border-[#3E3E44] text-xs text-[#9A9AA2] hover:text-white transition-all truncate max-w-xs"
+                  className="px-3 py-1 rounded-full bg-[#141416]/80 hover:bg-[#1E1E22] border border-[#27272A] hover:border-[#3F3F46] text-xs text-[#A1A1AA] hover:text-white transition-all truncate max-w-xs cursor-pointer"
                 >
                   {top.split(' ')[0]} {top.split(' ')[1]} {top.split(' ')[2]}
                 </button>
@@ -394,19 +412,21 @@ export default function HomePage() {
 
         {/* Live SSE Multi-Agent Progress Streamer */}
         {isAnalyzing && (
-          <div className="max-w-3xl mx-auto bg-[#18181A] border border-[#2C2C30] rounded-xl p-5 shadow-2xl space-y-3 animate-in fade-in">
-            <div className="flex items-center justify-between text-xs text-[#9A9AA2] pb-2 border-b border-[#2C2C30]">
-              <span className="flex items-center gap-2 font-medium text-white">
-                <RefreshCw className="w-3.5 h-3.5 animate-spin text-white" strokeWidth={1.5} />
-                Multi-Agent Coordination in Progress...
+          <div className="max-w-3xl mx-auto bg-[#121214]/90 border border-[#27272A] rounded-2xl p-6 shadow-2xl space-y-4 animate-in fade-in backdrop-blur-xl">
+            <div className="flex items-center justify-between text-xs text-[#A1A1AA] pb-3 border-b border-[#27272A]">
+              <span className="flex items-center gap-2.5 font-bold text-white">
+                <RefreshCw className="w-4 h-4 animate-spin text-emerald-400" strokeWidth={2} />
+                Multi-Agent Coordination & Quote-Gating Active...
               </span>
-              <span className="font-mono-code">{agentProgress.length} steps executed</span>
+              <span className="font-mono-code text-[11px] px-2 py-0.5 rounded bg-white/5 border border-white/10 text-emerald-400">
+                {agentProgress.length} steps executed
+              </span>
             </div>
-            <div className="space-y-1.5 max-h-40 overflow-y-auto font-mono-code text-xs">
+            <div className="space-y-2 max-h-48 overflow-y-auto font-mono-code text-xs pr-1">
               {agentProgress.map((p, idx) => (
-                <div key={idx} className="flex items-center gap-2 text-[#9A9AA2]">
-                  <Check className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" strokeWidth={2} />
-                  <span className="text-[#6B6B76] uppercase text-[10px] w-32 truncate">[{p.step}]</span>
+                <div key={idx} className="flex items-center gap-2.5 text-[#A1A1AA]">
+                  <Check className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" strokeWidth={2.5} />
+                  <span className="text-[#71717A] uppercase text-[10px] w-36 truncate">[{p.step}]</span>
                   <span className="text-[#F4F4F5] truncate">{p.detail}</span>
                 </div>
               ))}
@@ -414,90 +434,137 @@ export default function HomePage() {
           </div>
         )}
 
-        {/* RESULTS WORKSPACE (Matches Image 4 UI Reference) */}
+        {/* RESULTS WORKSPACE */}
         {result && (
           <div className="space-y-8 animate-in fade-in duration-300">
             
             {/* Top Report Header Bar */}
-            <div className="space-y-2">
-              <span className="text-[11px] font-semibold text-[#6B6B76] uppercase tracking-wider font-mono-code">
-                AUDITED REPORT
-              </span>
-              <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-white">
-                {result.question}
-              </h2>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#27272A]">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest font-mono-code px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20">
+                    VERIFIED AUDIT REPORT
+                  </span>
+                  <span className="text-xs text-[#71717A]">•</span>
+                  <span className="text-xs font-mono-code text-[#A1A1AA]">ID: {result.id}</span>
+                </div>
+                <h2 className="text-xl sm:text-3xl font-extrabold tracking-tight text-white">
+                  {result.question}
+                </h2>
+              </div>
+              <div className="flex items-center gap-2 text-xs font-mono-code text-[#A1A1AA]">
+                <Globe className="w-3.5 h-3.5 text-emerald-400" />
+                <span>{result.sources.length} Sources Ingested</span>
+              </div>
             </div>
 
-            {/* Top Metric Strip Cards (Image 4 exact cards) */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-5 gap-3.5">
+            {/* TOP METRIC STRIP (FUTURISTIC HUD GAUGES) */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5">
               
               {/* Coverage Card */}
-              <div className="bg-[#18181A] border border-[#2C2C30] rounded-xl p-4 sm:p-5">
-                <div className="text-xs text-[#9A9AA2] mb-1 font-medium">Coverage</div>
-                <div className="text-3xl font-bold text-white tracking-tight">
+              <div className="bg-[#121214]/80 border border-[#27272A] rounded-2xl p-4 sm:p-5 backdrop-blur-xl relative overflow-hidden group hover:border-[#3F3F46] transition-all">
+                <div className="flex justify-between items-start">
+                  <div className="text-xs text-[#A1A1AA] font-medium">Coverage</div>
+                  <span className="w-2 h-2 rounded-full bg-emerald-400" />
+                </div>
+                <div className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight mt-1 font-mono-code">
                   {(result.coverage * 100).toFixed(0)}%
                 </div>
-                <div className="text-[11px] text-[#6B6B76] mt-1">Verified Information</div>
+                <div className="w-full h-1 bg-[#0A0A0B] rounded-full overflow-hidden mt-3">
+                  <div className="h-full bg-emerald-400 rounded-full" style={{ width: `${result.coverage * 100}%` }} />
+                </div>
+                <div className="text-[10px] text-[#71717A] mt-1.5 font-mono-code">Verified Attributes</div>
               </div>
 
               {/* Gaps Card */}
-              <div className="bg-[#18181A] border border-[#2C2C30] rounded-xl p-4 sm:p-5">
-                <div className="text-xs text-[#9A9AA2] mb-1 font-medium">Gaps</div>
-                <div className="text-3xl font-bold text-white tracking-tight">
+              <div className="bg-[#121214]/80 border border-amber-500/30 rounded-2xl p-4 sm:p-5 backdrop-blur-xl relative overflow-hidden group hover:border-amber-400 transition-all bg-amber-500/[0.02]">
+                <div className="flex justify-between items-start">
+                  <div className="text-xs text-amber-400 font-medium">Gaps Found</div>
+                  <CircleDashed className="w-3.5 h-3.5 text-amber-400" />
+                </div>
+                <div className="text-3xl sm:text-4xl font-extrabold text-amber-400 tracking-tight mt-1 font-mono-code">
                   {result.summary_counts.gaps}
                 </div>
-                <div className="text-[11px] text-[#6B6B76] mt-1">Missing Attributes</div>
+                <div className="w-full h-1 bg-[#0A0A0B] rounded-full overflow-hidden mt-3">
+                  <div className="h-full bg-amber-400 rounded-full" style={{ width: '65%' }} />
+                </div>
+                <div className="text-[10px] text-amber-400/80 mt-1.5 font-mono-code">Missing Guidelines</div>
               </div>
 
               {/* Conflicts Card */}
-              <div className="bg-[#18181A] border border-[#2C2C30] rounded-xl p-4 sm:p-5">
-                <div className="text-xs text-[#9A9AA2] mb-1 font-medium">Conflicts</div>
-                <div className="text-3xl font-bold text-white tracking-tight">
+              <div className="bg-[#121214]/80 border border-rose-500/30 rounded-2xl p-4 sm:p-5 backdrop-blur-xl relative overflow-hidden group hover:border-rose-400 transition-all bg-rose-500/[0.02]">
+                <div className="flex justify-between items-start">
+                  <div className="text-xs text-rose-400 font-medium">Conflicts</div>
+                  <ArrowLeftRight className="w-3.5 h-3.5 text-rose-400" />
+                </div>
+                <div className="text-3xl sm:text-4xl font-extrabold text-rose-400 tracking-tight mt-1 font-mono-code">
                   {result.summary_counts.conflicts}
                 </div>
-                <div className="text-[11px] text-[#6B6B76] mt-1">Opposing Statements</div>
+                <div className="w-full h-1 bg-[#0A0A0B] rounded-full overflow-hidden mt-3">
+                  <div className="h-full bg-rose-400 rounded-full" style={{ width: '40%' }} />
+                </div>
+                <div className="text-[10px] text-rose-400/80 mt-1.5 font-mono-code">Opposing Rules</div>
               </div>
 
               {/* Outdated Card */}
-              <div className="bg-[#18181A] border border-[#2C2C30] rounded-xl p-4 sm:p-5">
-                <div className="text-xs text-[#9A9AA2] mb-1 font-medium">Outdated</div>
-                <div className="text-3xl font-bold text-white tracking-tight">
+              <div className="bg-[#121214]/80 border border-amber-400/30 rounded-2xl p-4 sm:p-5 backdrop-blur-xl relative overflow-hidden group hover:border-amber-400 transition-all bg-amber-400/[0.02]">
+                <div className="flex justify-between items-start">
+                  <div className="text-xs text-[#E4E4E7] font-medium">Outdated Notices</div>
+                  <Clock className="w-3.5 h-3.5 text-amber-300" />
+                </div>
+                <div className="text-3xl sm:text-4xl font-extrabold text-amber-300 tracking-tight mt-1 font-mono-code">
                   {result.summary_counts.outdated}
                 </div>
-                <div className="text-[11px] text-[#6B6B76] mt-1">Expired / Purani Info</div>
+                <div className="w-full h-1 bg-[#0A0A0B] rounded-full overflow-hidden mt-3">
+                  <div className="h-full bg-amber-300 rounded-full" style={{ width: '25%' }} />
+                </div>
+                <div className="text-[10px] text-[#A1A1AA] mt-1.5 font-mono-code">Expired Cycles</div>
               </div>
 
               {/* Dark Spot Index (DSI) */}
-              <div className="bg-[#18181A] border border-[#2C2C30] rounded-xl p-4 sm:p-5 col-span-2 sm:col-span-4 lg:col-span-1">
-                <div className="text-xs text-[#9A9AA2] mb-1 font-medium">Dark Spot Index</div>
-                <div className="text-3xl font-bold text-white tracking-tight">
+              <div className="bg-[#121214]/80 border border-[#27272A] rounded-2xl p-4 sm:p-5 col-span-2 sm:col-span-3 lg:col-span-1 backdrop-blur-xl group hover:border-[#3F3F46] transition-all">
+                <div className="flex justify-between items-start">
+                  <div className="text-xs text-[#A1A1AA] font-medium">Dark Spot Index (DSI)</div>
+                  <TrendingDown className="w-3.5 h-3.5 text-[#A1A1AA]" />
+                </div>
+                <div className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight mt-1 font-mono-code">
                   {(result.dsi * 100).toFixed(0)}%
                 </div>
-                <div className="text-[11px] text-[#6B6B76] mt-1">DSI = 1 − Coverage</div>
+                <div className="w-full h-1 bg-[#0A0A0B] rounded-full overflow-hidden mt-3">
+                  <div className="h-full bg-gradient-to-r from-amber-400 to-rose-400 rounded-full" style={{ width: `${result.dsi * 100}%` }} />
+                </div>
+                <div className="text-[10px] text-[#71717A] mt-1.5 font-mono-code">DSI = 1 − Coverage</div>
               </div>
 
             </div>
 
             {/* Filter Tabs Navigation */}
-            <div className="flex items-center gap-2 border-b border-[#2C2C30] pb-2 overflow-x-auto text-xs font-medium">
+            <div className="flex items-center gap-2 border-b border-[#27272A] pb-3 overflow-x-auto text-xs font-medium">
               {[
-                { id: 'all', label: 'All Findings' },
-                { id: 'gaps', label: `Potential Gaps (${result.summary_counts.gaps})` },
-                { id: 'conflicts', label: `Conflicts (${result.summary_counts.conflicts})` },
-                { id: 'outdated', label: `Outdated (${result.summary_counts.outdated})` },
-                { id: 'facts', label: `Sourced Facts (${result.summary_counts.sourced_facts})` },
-                { id: 'heatmap', label: 'Coverage Heatmap (F12)' },
+                { id: 'all', label: 'All Findings', count: result.findings.length },
+                { id: 'gaps', label: 'Potential Gaps', count: result.summary_counts.gaps },
+                { id: 'conflicts', label: 'Conflicts', count: result.summary_counts.conflicts },
+                { id: 'outdated', label: 'Outdated Notices', count: result.summary_counts.outdated },
+                { id: 'facts', label: 'Verified Facts', count: result.summary_counts.sourced_facts },
+                { id: 'heatmap', label: 'Coverage Topology Matrix (F12)' },
               ].map((tab) => (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id as any)}
-                  className={`px-3 py-1.5 rounded-lg whitespace-nowrap transition-colors ${
+                  className={`px-3.5 py-1.5 rounded-xl whitespace-nowrap transition-all duration-200 cursor-pointer flex items-center gap-1.5 ${
                     activeTab === tab.id
-                      ? 'bg-white text-[#0F0F10] font-semibold'
-                      : 'text-[#9A9AA2] hover:text-white hover:bg-[#18181A]'
+                      ? 'bg-white text-[#0A0A0B] font-bold shadow-md'
+                      : 'text-[#A1A1AA] hover:text-white hover:bg-[#18181B] border border-transparent'
                   }`}
                 >
-                  {tab.label}
+                  <span>{tab.label}</span>
+                  {tab.count !== undefined && (
+                    <span className={`text-[10px] font-mono-code px-1.5 py-0.2 rounded-full ${
+                      activeTab === tab.id ? 'bg-black/20 text-black' : 'bg-white/10 text-white'
+                    }`}>
+                      {tab.count}
+                    </span>
+                  )}
                 </button>
               ))}
             </div>
@@ -515,9 +582,9 @@ export default function HomePage() {
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
                 
                 {/* Left Column: Finding Cards List (7 Cols) */}
-                <div className="lg:col-span-7 space-y-3">
+                <div className="lg:col-span-7 space-y-3.5">
                   {filteredFindings.length === 0 ? (
-                    <div className="p-8 text-center bg-[#18181A] border border-[#2C2C30] rounded-xl text-xs text-[#9A9AA2]">
+                    <div className="p-8 text-center bg-[#121214] border border-[#27272A] rounded-2xl text-xs text-[#A1A1AA]">
                       No findings in this category.
                     </div>
                   ) : (
@@ -530,12 +597,12 @@ export default function HomePage() {
                       // Specific border styles based on Blueprint:
                       // Gap = Dashed border; Conflict = Solid strong border; Outdated = Dotted border
                       const borderStyle = isGap
-                        ? 'border-dashed border-[#3E3E44]'
+                        ? 'border-dashed border-amber-500/40 bg-amber-500/[0.02]'
                         : isConflict
-                        ? 'border-solid border-[#404040]'
+                        ? 'border-solid border-rose-500/40 bg-rose-500/[0.02]'
                         : isOutdated
-                        ? 'border-dotted border-[#3E3E44]'
-                        : 'border-[#2C2C30]';
+                        ? 'border-dotted border-amber-300/40 bg-amber-300/[0.02]'
+                        : 'border-[#27272A] bg-[#121214]/80';
 
                       const Icon = isGap ? CircleDashed : isConflict ? ArrowLeftRight : isOutdated ? Clock : Check;
 
@@ -543,34 +610,65 @@ export default function HomePage() {
                         <div
                           key={idx}
                           onClick={() => setSelectedFinding(finding)}
-                          className={`p-4 sm:p-5 rounded-xl transition-all cursor-pointer select-none bg-[#18181A] hover:bg-[#1F1F22] border ${borderStyle} ${
-                            isSelected ? 'ring-2 ring-white/80 bg-[#1F1F22]' : ''
+                          className={`p-5 rounded-2xl transition-all duration-200 cursor-pointer select-none backdrop-blur-xl border ${borderStyle} ${
+                            isSelected 
+                              ? 'ring-2 ring-white bg-[#18181B] shadow-[0_0_30px_rgba(255,255,255,0.08)]' 
+                              : 'hover:bg-[#18181B] hover:border-[#3F3F46]'
                           }`}
                         >
                           <div className="flex items-start justify-between gap-4">
-                            <div className="flex items-start gap-3">
-                              <Icon className="w-4 h-4 text-[#9A9AA2] mt-0.5 flex-shrink-0" strokeWidth={1.5} />
+                            <div className="flex items-start gap-3.5">
+                              <span className={`p-2 rounded-xl mt-0.5 flex-shrink-0 ${
+                                isConflict
+                                  ? 'bg-rose-500/10 text-rose-400'
+                                  : isGap
+                                  ? 'bg-amber-500/10 text-amber-400'
+                                  : isOutdated
+                                  ? 'bg-amber-300/10 text-amber-300'
+                                  : 'bg-emerald-500/10 text-emerald-400'
+                              }`}>
+                                <Icon className="w-4 h-4" strokeWidth={1.5} />
+                              </span>
                               <div>
-                                <h4 className="text-sm font-semibold text-[#F4F4F5] capitalize">
-                                  {finding.attribute.replace('_', ' ')}
-                                </h4>
-                                <p className="text-xs text-[#9A9AA2] mt-1 leading-relaxed">
+                                <div className="flex items-center gap-2">
+                                  <h4 className="text-sm font-bold text-[#F4F4F5] capitalize">
+                                    {finding.attribute.replace('_', ' ')}
+                                  </h4>
+                                  <span className="text-[10px] font-mono-code text-[#71717A]">
+                                    (Conf: {((finding.confidence || 0.9) * 100).toFixed(0)}%)
+                                  </span>
+                                </div>
+                                <p className="text-xs text-[#A1A1AA] mt-1.5 leading-relaxed">
                                   {finding.statement}
                                 </p>
+
+                                {/* Verbatim Quote Pill */}
+                                {finding.evidence && finding.evidence.length > 0 ? (
+                                  <div className="mt-2.5 inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-white/5 border border-white/10 text-[10px] text-[#E4E4E7] font-mono-code">
+                                    <FileText className="w-3 h-3 text-emerald-400" />
+                                    <span>{finding.evidence.length} Verbatim Quote(s) Verified</span>
+                                  </div>
+                                ) : (
+                                  <div className="mt-2.5 inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-amber-500/10 border border-amber-500/20 text-[10px] text-amber-400 font-mono-code">
+                                    <span>Abstain Mode: Not found in reviewed sources</span>
+                                  </div>
+                                )}
                               </div>
                             </div>
 
                             {/* Badge */}
                             <span
-                              className={`text-[10px] font-mono-code px-2 py-0.5 rounded-full uppercase tracking-wider flex-shrink-0 ${
+                              className={`text-[10px] font-mono-code px-2.5 py-1 rounded-full uppercase tracking-wider flex-shrink-0 ${
                                 isConflict
-                                  ? 'bg-white text-[#0F0F10] font-semibold'
+                                  ? 'bg-rose-500 text-white font-bold'
                                   : isGap
-                                  ? 'border border-dashed border-[#6B6B76] text-[#9A9AA2]'
-                                  : 'bg-[#1F1F22] border border-[#2C2C30] text-[#9A9AA2]'
+                                  ? 'border border-dashed border-amber-400 text-amber-400 font-semibold'
+                                  : isOutdated
+                                  ? 'bg-amber-400 text-black font-semibold'
+                                  : 'bg-[#18181B] border border-[#27272A] text-[#A1A1AA]'
                               }`}
                             >
-                              {finding.type === 'conflict' ? 'Conflict' : finding.type === 'outdated' ? 'Outdated' : 'Potential gap'}
+                              {finding.type === 'conflict' ? 'Conflict' : finding.type === 'outdated' ? 'Outdated' : isGap ? 'Potential gap' : 'Sourced Fact'}
                             </span>
                           </div>
                         </div>
@@ -580,7 +678,7 @@ export default function HomePage() {
                 </div>
 
                 {/* Right Column: Sticky Evidence Sheet Panel (5 Cols - Image 4) */}
-                <div className="lg:col-span-5">
+                <div className="lg:col-span-5 sticky top-20">
                   <EvidenceSheet finding={selectedFinding} />
                 </div>
 

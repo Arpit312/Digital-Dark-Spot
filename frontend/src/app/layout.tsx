@@ -15,9 +15,18 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="dark">
-      <body className="min-h-screen flex flex-col bg-[#0F0F10] text-[#F4F4F5] antialiased">
+      <body className="min-h-screen flex flex-col bg-[#0A0A0B] text-[#F4F4F5] antialiased relative selection:bg-white/20 selection:text-white">
+        {/* Dynamic Background Engineering Grid & Ambient Glow Layers */}
+        <div className="fixed inset-0 pointer-events-none z-0">
+          <div className="absolute inset-0 bg-grid-blueprint opacity-60" />
+          <div className="absolute inset-0 radial-spotlight-top opacity-80" />
+          <div className="absolute inset-0 radial-spotlight-accent opacity-40" />
+          {/* Subtle perimeter vignette */}
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_40%,#0A0A0B_95%)] opacity-85" />
+        </div>
+
         <Navbar />
-        <main className="flex-1 flex flex-col">
+        <main className="flex-1 flex flex-col relative z-10">
           {children}
         </main>
         <Footer />

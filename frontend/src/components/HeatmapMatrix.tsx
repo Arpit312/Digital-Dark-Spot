@@ -1,6 +1,6 @@
 import React from 'react';
 import { HeatmapRow } from '../lib/types';
-import { Check, X, ShieldAlert } from 'lucide-react';
+import { Check, X, ShieldAlert, ShieldCheck, Globe, Layers, AlertTriangle } from 'lucide-react';
 
 interface HeatmapMatrixProps {
   heatmap: HeatmapRow[];
@@ -13,76 +13,134 @@ export const HeatmapMatrix: React.FC<HeatmapMatrixProps> = ({
 }) => {
   if (!heatmap || heatmap.length === 0) return null;
 
-  const sourcesList = heatmap[0]?.sources || [];
-
   return (
-    <div className="bg-[#18181A] border border-[#2C2C30] rounded-xl p-5 overflow-x-auto shadow-md">
-      <div className="flex items-center justify-between mb-4">
+    <div className="bg-[#121214]/90 border border-[#27272A] rounded-2xl p-6 shadow-2xl space-y-6 backdrop-blur-xl">
+      
+      {/* Header with Info and Legend */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#27272A]">
         <div>
-          <h3 className="text-sm font-semibold text-[#F4F4F5] flex items-center gap-2">
-            <span>Information Coverage Matrix (F12)</span>
-          </h3>
-          <p className="text-xs text-[#9A9AA2] mt-0.5">
-            Cross-document comparison showing which attributes are verified vs missing in each source.
+          <div className="flex items-center gap-2">
+            <span className="p-1.5 rounded-lg bg-white/5 border border-white/10 text-white">
+              <Layers className="w-4 h-4 text-white" strokeWidth={1.5} />
+            </span>
+            <h3 className="text-sm sm:text-base font-bold text-[#F4F4F5] tracking-tight">
+              Attribute Coverage Topology (F12)
+            </h3>
+          </div>
+          <p className="text-xs text-[#A1A1AA] mt-1">
+            Visual topology showing deterministic verification across all ingested public sources — no tabular guesswork.
           </p>
         </div>
-        <div className="flex items-center gap-3 text-xs text-[#9A9AA2]">
-          <div className="flex items-center gap-1.5">
-            <span className="w-3 h-3 rounded bg-white" />
-            <span>Covered</span>
+
+        {/* Visual Legend */}
+        <div className="flex items-center gap-3 text-xs">
+          <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-mono-code text-[11px]">
+            <Check className="w-3 h-3" strokeWidth={2} />
+            <span>Verified Present</span>
           </div>
-          <div className="flex items-center gap-1.5">
-            <span className="w-3 h-3 rounded bg-[#0F0F10] border border-dashed border-[#6B6B76]" />
-            <span>Dark Spot (Gap)</span>
+          <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 font-mono-code text-[11px]">
+            <X className="w-3 h-3" strokeWidth={1.5} />
+            <span>Dark Spot Gap</span>
           </div>
         </div>
       </div>
 
-      <table className="w-full text-left text-xs border-collapse">
-        <thead>
-          <tr className="border-b border-[#2C2C30]">
-            <th className="py-2.5 px-3 font-semibold text-[#9A9AA2] uppercase tracking-wider text-[11px] w-48">
-              Expected Attribute
-            </th>
-            {sourcesList.map((s, idx) => (
-              <th key={idx} className="py-2.5 px-3 font-medium text-[#F4F4F5] text-center max-w-[140px] truncate">
-                <div className="truncate text-xs font-mono-code">{s.source_domain || `Source ${idx+1}`}</div>
-                <div className="text-[10px] text-[#6B6B76] font-normal">
-                  Trust: {(s.trust * 100).toFixed(0)}%
-                </div>
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-[#2C2C30]">
-          {heatmap.map((row, rIdx) => (
-            <tr
+      {/* Futuristic Card Grid (Replacing Boring Tables) */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {heatmap.map((row, rIdx) => {
+          const coveredCount = row.sources.filter(s => s.covered).length;
+          const totalCount = row.sources.length;
+          const coveragePct = totalCount > 0 ? (coveredCount / totalCount) * 100 : 0;
+          const isCompleteDarkSpot = coveredCount === 0;
+
+          return (
+            <div
               key={rIdx}
               onClick={() => onSelectAttribute && onSelectAttribute(row.attribute)}
-              className="hover:bg-[#1F1F22] cursor-pointer transition-colors"
+              className={`group relative p-4 rounded-xl border transition-all duration-300 cursor-pointer overflow-hidden ${
+                isCompleteDarkSpot 
+                  ? 'bg-amber-500/[0.03] border-amber-500/30 hover:border-amber-400 hover:shadow-[0_0_25px_rgba(245,158,11,0.1)]'
+                  : 'bg-[#18181B]/80 border-[#27272A] hover:border-[#3F3F46] hover:bg-[#1E1E22]'
+              }`}
             >
-              <td className="py-2.5 px-3 font-medium text-[#F4F4F5] capitalize">
-                {row.attribute.replace('_', ' ')}
-              </td>
-              {row.sources.map((cell, cIdx) => (
-                <td key={cIdx} className="py-2.5 px-3 text-center">
-                  <div className="flex justify-center">
-                    {cell.covered ? (
-                      <span className="w-6 h-6 rounded flex items-center justify-center bg-white text-[#0F0F10] shadow-sm">
-                        <Check className="w-3.5 h-3.5" strokeWidth={2} />
+              {/* Top Row: Attribute Name & Coverage Gauge */}
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <span className={`w-2 h-2 rounded-full ${
+                    isCompleteDarkSpot ? 'bg-amber-400 animate-pulse' : 'bg-emerald-400'
+                  }`} />
+                  <span className="text-xs font-bold capitalize text-[#F4F4F5] tracking-wide">
+                    {row.attribute.replace('_', ' ')}
+                  </span>
+                </div>
+
+                <span className={`text-[11px] font-mono-code px-2 py-0.5 rounded-full border ${
+                  isCompleteDarkSpot
+                    ? 'bg-amber-500/10 text-amber-400 border-amber-500/30'
+                    : coveragePct === 100
+                    ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
+                    : 'bg-white/5 text-[#E4E4E7] border-white/10'
+                }`}>
+                  {isCompleteDarkSpot ? '0% — Critical Gap' : `${coveragePct.toFixed(0)}% Sourced`}
+                </span>
+              </div>
+
+              {/* Progress bar visualizer */}
+              <div className="w-full h-1.5 bg-[#0A0A0B] rounded-full overflow-hidden mb-3.5 border border-[#27272A]/50">
+                <div 
+                  className={`h-full rounded-full transition-all duration-500 ${
+                    isCompleteDarkSpot
+                      ? 'bg-amber-500/30'
+                      : coveragePct === 100
+                      ? 'bg-emerald-400'
+                      : 'bg-gradient-to-r from-emerald-400 to-amber-400'
+                  }`}
+                  style={{ width: `${Math.max(coveragePct, 6)}%` }}
+                />
+              </div>
+
+              {/* Source Verification Chips */}
+              <div className="space-y-1.5">
+                <div className="text-[10px] uppercase font-mono-code text-[#71717A] tracking-wider">
+                  Source Ingestion Nodes:
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {row.sources.map((cell, cIdx) => (
+                    <div
+                      key={cIdx}
+                      className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-lg text-[11px] border transition-all ${
+                        cell.covered
+                          ? 'bg-[#141416] border-[#3F3F46] text-[#F4F4F5]'
+                          : 'bg-[#0E0E10] border-dashed border-[#27272A] text-[#71717A]'
+                      }`}
+                    >
+                      <Globe className="w-3 h-3 text-[#A1A1AA]" strokeWidth={1.5} />
+                      <span className="font-mono-code text-[10px] truncate max-w-[120px]">
+                        {cell.source_domain}
                       </span>
-                    ) : (
-                      <span className="w-6 h-6 rounded flex items-center justify-center bg-[#0F0F10] border border-dashed border-[#3E3E44] text-[#6B6B76]">
-                        <X className="w-3.5 h-3.5" strokeWidth={1.5} />
-                      </span>
-                    )}
-                  </div>
-                </td>
-              ))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
+                      {cell.covered ? (
+                        <Check className="w-3 h-3 text-emerald-400 ml-0.5" strokeWidth={2.5} />
+                      ) : (
+                        <X className="w-3 h-3 text-amber-500/70 ml-0.5" strokeWidth={2} />
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Hover Cue */}
+              <div className="mt-3 pt-2.5 border-t border-[#27272A]/60 flex items-center justify-between text-[10px] text-[#71717A]">
+                <span>Click to filter findings</span>
+                <span className="font-mono-code text-[#A1A1AA] group-hover:text-white transition-colors">
+                  &rarr; Inspect Evidence
+                </span>
+              </div>
+
+            </div>
+          );
+        })}
+      </div>
+
     </div>
   );
 };

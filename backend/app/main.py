@@ -1,3 +1,4 @@
+import asyncio
 import json
 import logging
 from typing import List, Optional
@@ -68,10 +69,12 @@ async def analyze_topic_stream(req: AnalyzeRequest):
             progress_queue.append(f"data: {data}\n\n")
 
         # Start analysis task
-        task = orchestrator.analyze_topic(
-            question=req.question.strip(),
-            urls=req.urls,
-            progress_callback=callback
+        task = asyncio.create_task(
+            orchestrator.analyze_topic(
+                question=req.question.strip(),
+                urls=req.urls,
+                progress_callback=callback
+            )
         )
 
         while not task.done():
@@ -86,7 +89,6 @@ async def analyze_topic_stream(req: AnalyzeRequest):
         # Send final completed result payload
         yield f"data: {json.dumps({'step': 'result', 'payload': result})}\n\n"
 
-    import asyncio
     return StreamingResponse(event_generator(), media_type="text/event-stream")
 
 @app.post("/sources/search")
