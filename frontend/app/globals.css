@@ -15,4 +15,5 @@ body { @apply bg-bg text-fg font-sans antialiased; }
   .h-display { @apply text-5xl font-semibold md:text-7xl; letter-spacing: -0.04em; line-height: 1.02; }
 }
 .dot-grid { background-image: radial-gradient(rgba(255,255,255,.09) 1px, transparent 1px); background-size: 24px 24px; -webkit-mask-image: radial-gradient(ellipse at center, #000 35%, transparent 75%); mask-image: radial-gradient(ellipse at center, #000 35%, transparent 75%); }
+.bg-radial-vignette { background: radial-gradient(circle at 50% 50%, transparent 55%, rgba(0, 0, 0, 0.75) 100%); }
 @media (prefers-reduced-motion: reduce) { * { animation-duration: .01ms !important; transition-duration: .01ms !important; } }
