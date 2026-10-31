@@ -15,18 +15,28 @@ else:
 class Settings:
     def __init__(self):
         # LLM API Keys
-        self.GEMINI_API_KEY: str = os.getenv("GEMINI_API_KEY", "")
-        self.GROQ_API_KEY: str = os.getenv("GROQ_API_KEY", "")
+        self.GEMINI_API_KEY: str = os.getenv("GEMINI_API_KEY", "").strip()
+        self.GROQ_API_KEY: str = os.getenv("GROQ_API_KEY", "").strip()
 
         # Search
-        self.TAVILY_API_KEY: str = os.getenv("TAVILY_API_KEY", "")
+        self.TAVILY_API_KEY: str = os.getenv("TAVILY_API_KEY", "").strip()
 
-        # Supabase
-        self.SUPABASE_URL: str = os.getenv("SUPABASE_URL", "")
-        self.SUPABASE_ANON_KEY: str = os.getenv("SUPABASE_ANON_KEY", "")
-        self.SUPABASE_SERVICE_ROLE_KEY: str = os.getenv("SUPABASE_SERVICE_ROLE_KEY", "")
-        self.SUPABASE_JWT_SECRET: str = os.getenv("SUPABASE_JWT_SECRET", "")
-        self.DATABASE_URL: str = os.getenv("DATABASE_URL", "")
+        # Supabase Configuration (supports both publishable/secret and legacy anon/service_role keys)
+        self.SUPABASE_URL: str = os.getenv("SUPABASE_URL", "").strip()
+        
+        # Anon / Publishable key
+        anon_key = os.getenv("SUPABASE_ANON_KEY", "").strip()
+        pub_key = os.getenv("SUPABASE_PUBLISHABLE_KEY", "").strip()
+        self.SUPABASE_ANON_KEY: str = pub_key or anon_key
+
+        # Service role / Secret key
+        service_key = os.getenv("SUPABASE_SERVICE_ROLE_KEY", "").strip()
+        sec_key = os.getenv("SUPABASE_SECRET_KEY", "").strip()
+        self.SUPABASE_SERVICE_ROLE_KEY: str = sec_key or service_key
+
+        self.SUPABASE_JWT_SECRET: str = os.getenv("SUPABASE_JWT_SECRET", "").strip()
+        self.SUPABASE_JWKS_URL: str = os.getenv("SUPABASE_JWKS_URL", "").strip()
+        self.DATABASE_URL: str = os.getenv("DATABASE_URL", "").strip()
 
         # App options
         self.USE_LOCAL_NLI: bool = os.getenv("USE_LOCAL_NLI", "false").lower() == "true"

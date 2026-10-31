@@ -165,14 +165,14 @@ class OrchestratorAgent:
         sb = get_supabase_client()
         if sb:
             try:
-                sb.table("analyses").insert({
+                await sb.insert("analyses", {
                     "id": analysis_id,
                     "question": question,
                     "topic_type": topic_type,
                     "coverage": gap_res["coverage"],
                     "dsi": gap_res["dsi"],
                     "status": "completed"
-                }).execute()
+                })
             except Exception as e:
                 logger.warning(f"Could not persist analysis to Supabase: {e}")
 
