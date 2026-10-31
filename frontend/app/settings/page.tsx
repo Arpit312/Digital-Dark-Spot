@@ -60,15 +60,15 @@ export default function Settings() {
 
       <div className="mx-auto max-w-4xl space-y-8 px-5 py-8">
         {savedNotice && (
-          <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-4 text-xs font-mono text-emerald-400 flex items-center gap-2">
-            <CheckCircle2 size={14} /> Preferences and audit thresholds saved to local configuration.
+          <div className="rounded-xl border border-white/20 bg-white/10 p-4 text-xs font-mono text-white flex items-center gap-2">
+            <CheckCircle2 size={14} className="text-white" /> Preferences and audit thresholds saved to local configuration.
           </div>
         )}
 
         {/* Section 1: AI Model & Guardrail Thresholds */}
         <div className="card p-6">
           <div className="flex items-center gap-2 border-b border-line pb-4 mb-4">
-            <Shield size={16} className="text-emerald-400" />
+            <Shield size={16} className="text-white" />
             <h3 className="text-base font-semibold">AI Verification & Guardrails</h3>
           </div>
 

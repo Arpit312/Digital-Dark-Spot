@@ -13,7 +13,7 @@ export default function Privacy() {
       <div className="mx-auto max-w-4xl space-y-8 px-5 py-8">
         <div className="grid gap-4 sm:grid-cols-3">
           <div className="card p-5">
-            <ShieldCheck size={20} className="text-emerald-400" />
+            <ShieldCheck size={20} className="text-white" />
             <div className="mt-3 text-sm font-semibold">Zero Data Monetization</div>
             <p className="mt-1 text-xs text-muted">We never sell, rent, or commercialize student queries or institutional circulars.</p>
           </div>

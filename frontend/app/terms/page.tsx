@@ -13,7 +13,7 @@ export default function Terms() {
       <div className="mx-auto max-w-4xl space-y-8 px-5 py-8">
         <div className="grid gap-4 sm:grid-cols-3">
           <div className="card p-5">
-            <Scale size={20} className="text-emerald-400" />
+            <Scale size={20} className="text-white" />
             <div className="mt-3 text-sm font-semibold">Independent Verification</div>
             <p className="mt-1 text-xs text-muted">Findings provide mathematical signals to assist human verification, not statutory replacements.</p>
           </div>

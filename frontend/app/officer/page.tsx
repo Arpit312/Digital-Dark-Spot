@@ -97,7 +97,7 @@ export default function Officer() {
         sub="Inter-departmental consistency auditor, differential privacy citizen friction analytics, and cryptographic multi-signature source registry for designated verification officers."
       >
         <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
-          <div className="inline-flex items-center gap-2 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5 text-xs text-emerald-400">
+          <div className="inline-flex items-center gap-2 rounded-lg border border-white/20 bg-white/5 px-3 py-1.5 text-xs text-white">
             <ShieldCheck size={13} />
             Verified Officer: GOV-IN-7824 (Ministry of Education)
           </div>
@@ -235,7 +235,7 @@ export default function Officer() {
                         PDF Reference <ExternalLink size={11} />
                       </a>
                     </div>
-                    <p className="mt-2 text-xs font-mono text-emerald-300">
+                    <p className="mt-2 text-xs font-mono text-white">
                       {selectedAudit.faqClaim}
                     </p>
                   </div>
@@ -282,7 +282,7 @@ export default function Officer() {
                     Differential privacy aggregated metrics identifying where citizens experience dark spots in public schemes.
                   </p>
                 </div>
-                <div className="badge border-emerald-500/30 text-emerald-400 text-xs">
+                <div className="badge border-white/20 text-white text-xs">
                   Anonymized Differential Privacy
                 </div>
               </div>
@@ -353,7 +353,7 @@ export default function Officer() {
                     <span
                       className={`badge ${
                         s.status.includes("Active")
-                          ? "border-emerald-500/30 text-emerald-400"
+                          ? "border-white/20 text-white"
                           : s.status.includes("Progress")
                           ? "border-amber-500/30 text-amber-400"
                           : "border-line text-subtle"
@@ -396,11 +396,11 @@ export default function Officer() {
 
               <div className="rounded-lg border border-white/10 bg-white/5 p-3 text-xs text-muted flex items-center justify-between">
                 <span>Ed25519 Signing Officer: GOV-IN-7824 (Asha R.)</span>
-                <span className="text-emerald-400 font-mono">Signatures: 1 of 2 Ready</span>
+                <span className="text-white font-mono">Signatures: 1 of 2 Ready</span>
               </div>
 
               {dispatchStatus && (
-                <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-3 text-xs font-mono text-emerald-400">
+                <div className="rounded-lg border border-white/20 bg-white/10 p-3 text-xs font-mono text-white">
                   {dispatchStatus}
                 </div>
               )}

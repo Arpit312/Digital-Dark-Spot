@@ -24,7 +24,7 @@ const meta: Record<string, [any, string, string]> = {
   conflict: [ArrowLeftRight, "Possible conflict", "border-solid text-red-400"],
   outdated: [Clock, "Possibly outdated", "border-dotted text-purple-400"],
   unanswered: [CircleHelp, "Unanswered", "border-solid text-blue-400"],
-  sourced_fact: [CheckCircle2, "Verified fact", "border-solid text-emerald-400"]
+  sourced_fact: [CheckCircle2, "Verified fact", "border-solid text-white"]
 };
 
 const tabs = ["All", "Gaps", "Conflicts", "Outdated", "Checklist", "Sources"];
@@ -317,7 +317,7 @@ export default function ReportPage({ params }: { params: { id: string } }) {
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 text-sm font-medium">
-                  <ShieldCheck size={16} className="text-emerald-400" />
+                  <ShieldCheck size={16} className="text-white" />
                   Verbatim Source Evidence
                 </div>
                 <button onClick={() => setSel(null)} aria-label="Close">

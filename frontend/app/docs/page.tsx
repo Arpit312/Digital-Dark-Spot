@@ -108,7 +108,7 @@ export default function Docs() {
                 <div className="grid gap-3 sm:grid-cols-2">
                   <div className="rounded-xl border border-line bg-card/50 p-4">
                     <div className="flex items-center justify-between">
-                      <span className="text-xs font-mono text-emerald-400">Phase 1: Ingestion</span>
+                      <span className="text-xs font-mono text-white">Phase 1: Ingestion</span>
                       <span className="badge text-[10px]">Agent 01 & 02</span>
                     </div>
                     <div className="mt-2 text-sm font-semibold">Tavily Ingestion & PyMuPDF Parser</div>
@@ -175,7 +175,7 @@ export default function Docs() {
 
                   <div className="rounded-xl border border-line bg-card/60 p-5">
                     <h4 className="text-sm font-semibold">2. Temporal Authority Decay ($\lambda_a$)</h4>
-                    <div className="my-2 rounded-lg bg-black/50 p-3 font-mono text-xs text-emerald-300">
+                    <div className="my-2 rounded-lg bg-black/50 p-3 font-mono text-xs text-white">
                       Weight(t) = exp(-lambda_a * (CurrentDate - PublishedDate) / HalfLifeDays)
                     </div>
                     <p className="text-xs text-muted">
@@ -206,8 +206,8 @@ export default function Docs() {
                 <h2 className="text-2xl font-bold tracking-tight">Finding Classification Taxonomy</h2>
                 
                 <div className="space-y-3">
-                  <div className="flex items-start gap-3 rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-4">
-                    <span className="badge border-emerald-500/40 text-emerald-400 mt-0.5">Verified Fact</span>
+                  <div className="flex items-start gap-3 rounded-xl border border-white/10 bg-white/[0.03] p-4">
+                    <span className="badge border-white/20 text-white mt-0.5">Verified Fact</span>
                     <p className="text-xs text-muted">
                       A clear, undisputed rule or cutoff confirmed by canonical government sources with zero contradictory records.
                     </p>
@@ -247,7 +247,7 @@ export default function Docs() {
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <span className="rounded bg-emerald-500/20 px-2 py-0.5 font-mono text-xs font-bold text-emerald-400">POST</span>
+                      <span className="rounded bg-white/10 px-2 py-0.5 font-mono text-xs font-bold text-white">POST</span>
                       <span className="font-mono text-xs text-fg">/api/analyze</span>
                     </div>
                     <button
@@ -259,7 +259,7 @@ export default function Docs() {
                       }
                       className="text-xs text-muted hover:text-fg flex items-center gap-1"
                     >
-                      {copiedCode === "curl1" ? <Check size={12} className="text-emerald-400" /> : <Copy size={12} />}
+                      {copiedCode === "curl1" ? <Check size={12} className="text-white" /> : <Copy size={12} />}
                       <span>Copy cURL</span>
                     </button>
                   </div>
@@ -288,7 +288,7 @@ data: {"event": "done", "analysis_id": "nsp_audit_2026_01"}`}
                       }
                       className="text-xs text-muted hover:text-fg flex items-center gap-1"
                     >
-                      {copiedCode === "curl2" ? <Check size={12} className="text-emerald-400" /> : <Copy size={12} />}
+                      {copiedCode === "curl2" ? <Check size={12} className="text-white" /> : <Copy size={12} />}
                       <span>Copy cURL</span>
                     </button>
                   </div>

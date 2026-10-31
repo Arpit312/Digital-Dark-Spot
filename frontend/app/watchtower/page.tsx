@@ -173,8 +173,8 @@ export default function Watchtower() {
             <div className="border-t border-line pt-5">
               <div className="flex items-center justify-between mb-3 text-xs font-semibold text-fg">
                 <span>Active Tracked Endpoints ({sources.length})</span>
-                <span className="font-mono text-[11px] text-emerald-400 flex items-center gap-1.5">
-                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                <span className="font-mono text-[11px] text-white flex items-center gap-1.5">
+                  <span className="h-1.5 w-1.5 rounded-full bg-white animate-pulse" />
                   Live SimHash Radar
                 </span>
               </div>
@@ -199,7 +199,7 @@ export default function Watchtower() {
                         <span>•</span>
                         <span
                           className={`font-medium ${
-                            s.status === "Changed" ? "text-amber-400" : "text-emerald-400"
+                            s.status === "Changed" ? "text-amber-400" : "text-white"
                           }`}
                         >
                           {s.status}
@@ -279,8 +279,8 @@ export default function Watchtower() {
                         {alert.before}
                       </div>
                     </div>
-                    <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/[0.04] p-3 text-xs font-mono">
-                      <div className="text-[10px] font-bold uppercase tracking-wider text-emerald-400 mb-1">
+                    <div className="rounded-lg border border-white/20 bg-white/[0.04] p-3 text-xs font-mono">
+                      <div className="text-[10px] font-bold uppercase tracking-wider text-white mb-1">
                         Active Verified Update
                       </div>
                       <div className="text-zinc-100 font-medium leading-relaxed">

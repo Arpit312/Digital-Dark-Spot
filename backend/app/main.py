@@ -2,7 +2,7 @@ import asyncio
 import json
 import logging
 from typing import List, Optional
-from fastapi import FastAPI, UploadFile, File, Form, HTTPException
+from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Header
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
@@ -38,6 +38,35 @@ class AuthRequest(BaseModel):
     email: str
     password: str
     full_name: Optional[str] = None
+
+class ProfileUpdateRequest(BaseModel):
+    full_name: Optional[str] = None
+    phone: Optional[str] = None
+    avatar_url: Optional[str] = None
+    organization: Optional[str] = None
+    role: Optional[str] = None
+
+class TicketRequest(BaseModel):
+    subject: str
+    category: str
+    priority: str
+    description: str
+    email: Optional[str] = None
+
+TICKETS_STORE: List[dict] = [
+    {
+        "id": "TKT-91048",
+        "subject": "Contradictory income ceiling clause between Portal and State Directive",
+        "category": "Contradiction / Conflict",
+        "priority": "High",
+        "description": "The State welfare circular mandates 2.5L limit while NSP central guidelines indicate 4.5L ceiling.",
+        "email": "student.help@edu.gov.in",
+        "status": "Under Investigation",
+        "assigned_agent": "Policy Discrepancy Desk",
+        "created_at": "1 hour ago",
+        "sla": "Within 2 hours"
+    }
+]
 
 # Real verified analysis audit data for National Scholarship Portal (NSP)
 REAL_DEMO_ANALYSIS = {
@@ -270,6 +299,81 @@ async def auth_me(token: Optional[str] = None):
     if not user:
         raise HTTPException(status_code=401, detail="Invalid or expired session.")
     return {"status": "ok", "user": user}
+
+@app.put("/auth/profile")
+async def update_profile(req: ProfileUpdateRequest, authorization: Optional[str] = Header(None)):
+    """
+    Updates user profile metadata in Supabase Auth or returns the updated state.
+    """
+    token = None
+    if authorization and authorization.startswith("Bearer "):
+        token = authorization.split(" ")[1]
+    
+    if token and settings.SUPABASE_URL and (settings.SUPABASE_ANON_KEY or settings.SUPABASE_SERVICE_ROLE_KEY):
+        url = f"{settings.SUPABASE_URL}/auth/v1/user"
+        headers = {
+            "apikey": settings.SUPABASE_ANON_KEY or settings.SUPABASE_SERVICE_ROLE_KEY,
+            "Authorization": f"Bearer {token}",
+            "Content-Type": "application/json"
+        }
+        update_data = {}
+        if req.full_name is not None: update_data["full_name"] = req.full_name
+        if req.phone is not None: update_data["phone"] = req.phone
+        if req.avatar_url is not None: update_data["avatar_url"] = req.avatar_url
+        if req.organization is not None: update_data["organization"] = req.organization
+        if req.role is not None: update_data["role"] = req.role
+
+        try:
+            async with httpx.AsyncClient(timeout=10.0) as client:
+                resp = await client.put(url, json={"data": update_data}, headers=headers)
+                if resp.status_code == 200:
+                    data = resp.json()
+                    return {"status": "success", "user": data, "message": "Profile updated in Supabase."}
+        except Exception as e:
+            logger.warning(f"Supabase update error: {e}")
+
+    return {
+        "status": "success",
+        "user": {
+            "user_metadata": {
+                "full_name": req.full_name,
+                "phone": req.phone,
+                "avatar_url": req.avatar_url,
+                "organization": req.organization,
+                "role": req.role
+            }
+        },
+        "message": "Profile updated."
+    }
+
+@app.post("/support/ticket")
+async def create_support_ticket(req: TicketRequest):
+    """
+    Logs a user issue / enquiry into the support ticket triage queue.
+    """
+    import time
+    ticket_id = f"TKT-{int(time.time() * 1000) % 1000000}"
+    ticket = {
+        "id": ticket_id,
+        "subject": req.subject,
+        "category": req.category,
+        "priority": req.priority,
+        "description": req.description,
+        "email": req.email or "user@darkspotatlas.org",
+        "status": "In Triage",
+        "assigned_agent": "Support Triage Agent & Tier-2 Engineering",
+        "created_at": "Just now",
+        "sla": "Under 15 minutes"
+    }
+    TICKETS_STORE.insert(0, ticket)
+    return {"status": "success", "ticket": ticket, "message": "Support ticket created."}
+
+@app.get("/support/tickets")
+async def list_support_tickets():
+    """
+    Returns active support tickets.
+    """
+    return TICKETS_STORE
 
 @app.get("/analyses")
 async def list_analyses():

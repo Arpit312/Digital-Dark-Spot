@@ -74,7 +74,7 @@ export default function Accuracy() {
                   <div className="mb-1.5 flex items-center justify-between text-xs">
                     <span className="text-zinc-300 font-medium">{step.label}</span>
                     <div className="flex items-center gap-2">
-                      <span className="text-emerald-400 font-mono text-[11px]">{step.delta}</span>
+                      <span className="text-white font-mono text-[11px]">{step.delta}</span>
                       <span className="font-mono font-semibold text-fg">{step.f1}%</span>
                     </div>
                   </div>
@@ -121,7 +121,7 @@ export default function Accuracy() {
                         <td className="py-2.5 font-medium text-zinc-300">{row.type}</td>
                         <td className="py-2.5 text-right font-mono text-fg">{row.precision}</td>
                         <td className="py-2.5 text-right font-mono text-muted">{row.recall}</td>
-                        <td className="py-2.5 text-right font-mono font-semibold text-emerald-400">
+                        <td className="py-2.5 text-right font-mono font-semibold text-white">
                           {row.f1}
                         </td>
                       </tr>
@@ -132,7 +132,7 @@ export default function Accuracy() {
             </div>
 
             <div className="mt-5 rounded-lg border border-line bg-surface/50 p-3 text-[11px] text-subtle flex items-center gap-2">
-              <CheckCircle2 size={14} className="text-emerald-400 shrink-0" />
+              <CheckCircle2 size={14} className="text-white shrink-0" />
               <span>Evidence Auditor enforces 100% faithful string attribution across all types.</span>
             </div>
           </div>

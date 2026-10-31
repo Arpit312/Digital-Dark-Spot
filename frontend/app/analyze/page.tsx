@@ -503,7 +503,7 @@ function AnalyzeContent() {
                             cur
                               ? "border-white/40 bg-white/10 text-white"
                               : done
-                              ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
+                              ? "border-white/30 bg-white/10 text-white"
                               : "border-line text-muted"
                           }`}
                         >
@@ -538,7 +538,7 @@ function AnalyzeContent() {
                             cur
                               ? "bg-amber-400/10 text-amber-300 border border-amber-400/30 animate-pulse"
                               : done
-                              ? "bg-emerald-400/10 text-emerald-400 border border-emerald-400/30"
+                              ? "bg-white/10 text-white border border-white/20"
                               : "bg-white/5 text-subtle border border-line"
                           }`}
                         >

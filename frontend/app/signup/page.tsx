@@ -64,7 +64,7 @@ export default function Signup() {
           </div>
         )}
         {success && (
-          <div className="mt-4 rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-3 text-xs text-emerald-400">
+          <div className="mt-4 rounded-lg border border-white/20 bg-white/[0.04] p-3 text-xs text-white">
             {success}
           </div>
         )}
@@ -135,7 +135,7 @@ export default function Signup() {
         </p>
 
         <div className="mt-6 flex items-center justify-center gap-1.5 text-[11px] text-subtle border-t border-line pt-4">
-          <ShieldCheck size={13} className="text-emerald-400" />
+          <ShieldCheck size={13} className="text-white" />
           <span>Encrypted with Supabase JWT Authentication</span>
         </div>
       </div>

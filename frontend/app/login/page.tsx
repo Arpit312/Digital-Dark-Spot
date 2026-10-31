@@ -113,7 +113,7 @@ export default function Login() {
         </p>
 
         <div className="mt-6 flex items-center justify-center gap-1.5 text-[11px] text-subtle border-t border-line pt-4">
-          <ShieldCheck size={13} className="text-emerald-400" />
+          <ShieldCheck size={13} className="text-white" />
           <span>Secured via Supabase Cryptographic Auth</span>
         </div>
       </div>

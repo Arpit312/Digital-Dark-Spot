@@ -103,10 +103,10 @@ export default function Admin() {
           <div className="card p-4">
             <div className="flex items-center justify-between text-xs text-muted">
               <span>Analyses Today</span>
-              <Activity size={14} className="text-emerald-400" />
+              <Activity size={14} className="text-white" />
             </div>
             <div className="mt-1 text-2xl font-semibold">1,482</div>
-            <div className="mt-1 text-[11px] text-emerald-400">+18% vs yesterday</div>
+            <div className="mt-1 text-[11px] text-white">+18% vs yesterday</div>
           </div>
           <div className="card p-4">
             <div className="flex items-center justify-between text-xs text-muted">
@@ -225,7 +225,7 @@ export default function Admin() {
                       <span
                         className={`badge text-xs ${
                           item.status === "Approved"
-                            ? "border-emerald-500/30 text-emerald-400"
+                            ? "border-white/20 text-white"
                             : "border-red-500/30 text-red-400"
                         }`}
                       >
@@ -249,7 +249,7 @@ export default function Admin() {
                   Detailed health metrics for each computational node in the multi-agent consensus pipeline.
                 </p>
               </div>
-              <span className="badge border-emerald-500/30 text-emerald-400 text-xs">
+              <span className="badge border-white/20 text-white text-xs">
                 All Workers Healthy
               </span>
             </div>
@@ -259,7 +259,7 @@ export default function Admin() {
                 <div key={worker.id} className="rounded-xl border border-line bg-card/60 p-4">
                   <div className="flex items-center justify-between">
                     <span className="font-mono text-xs text-subtle">{worker.id}</span>
-                    <span className="badge text-[10px] border-emerald-500/30 text-emerald-400">
+                    <span className="badge text-[10px] border-white/20 text-white">
                       {worker.status}
                     </span>
                   </div>

@@ -263,7 +263,7 @@ export default function HowItWorks() {
                       <ul className="space-y-1 text-muted">
                         {agent.outputs.map((out, idx) => (
                           <li key={idx} className="flex items-start gap-1.5">
-                            <span className="text-emerald-400">•</span>
+                            <span className="text-white">•</span>
                             <span>{out}</span>
                           </li>
                         ))}
@@ -274,7 +274,7 @@ export default function HowItWorks() {
 
                 {/* Hallucination Gate */}
                 <div className="mt-6 border-t border-line pt-4 flex items-start gap-2.5 text-xs text-subtle">
-                  <ShieldCheck size={16} className="text-emerald-400 shrink-0 mt-0.5" />
+                  <ShieldCheck size={16} className="text-white shrink-0 mt-0.5" />
                   <span>
                     <strong className="text-zinc-300">Zero-Hallucination Gate:</strong>{" "}
                     {agent.hallucinationGuard}

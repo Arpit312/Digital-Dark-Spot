@@ -117,7 +117,7 @@ export default function Campus() {
           <div className="card p-4">
             <div className="text-xs text-muted">Circulars Audited</div>
             <div className="mt-1 text-2xl font-semibold">1,840+</div>
-            <div className="mt-1 text-[11px] text-emerald-400">Across 42 Universities</div>
+            <div className="mt-1 text-[11px] text-white">Across 42 Universities</div>
           </div>
           <div className="card p-4">
             <div className="text-xs text-muted">Contradictions Caught</div>
@@ -127,7 +127,7 @@ export default function Campus() {
           <div className="card p-4">
             <div className="text-xs text-muted">Confusion Reduction</div>
             <div className="mt-1 text-2xl font-semibold">74%</div>
-            <div className="mt-1 text-[11px] text-emerald-400">In student grievance queue</div>
+            <div className="mt-1 text-[11px] text-white">In student grievance queue</div>
           </div>
           <div className="card p-4">
             <div className="text-xs text-muted">Resolution Turnaround</div>
@@ -202,7 +202,7 @@ export default function Campus() {
                   
                   {selectedFileName ? (
                     <div className="mt-5 rounded-lg border border-white/20 bg-white/5 px-4 py-2.5 text-xs font-mono text-fg flex items-center gap-2">
-                      <FileText size={14} className="text-emerald-400" />
+                      <FileText size={14} className="text-white" />
                       <span>{selectedFileName}</span>
                     </div>
                   ) : (
@@ -225,7 +225,7 @@ export default function Campus() {
                   )}
 
                   {scanComplete && (
-                    <div className="mt-4 flex items-center gap-2 text-xs text-emerald-400 font-mono">
+                    <div className="mt-4 flex items-center gap-2 text-xs text-white font-mono">
                       <CheckCircle2 size={13} />
                       Audit Complete: 2 contradictory clauses found.
                     </div>
@@ -388,12 +388,12 @@ export default function Campus() {
                   </div>
 
                   {/* Reference side */}
-                  <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-4">
-                    <div className="flex items-center justify-between text-xs text-emerald-400 font-medium">
+                  <div className="rounded-xl border border-white/10 bg-white/[0.03] p-4">
+                    <div className="flex items-center justify-between text-xs text-white font-medium">
                       <span>Statutory Regulation / Benchmark</span>
-                      <span className="font-mono text-[10px]">{selectedDiscrepancy.referenceSource}</span>
+                      <span className="font-mono text-[10px] text-muted">{selectedDiscrepancy.referenceSource}</span>
                     </div>
-                    <blockquote className="mt-2 border-l-2 border-emerald-500/50 pl-3 text-xs italic text-fg/90">
+                    <blockquote className="mt-2 border-l-2 border-white/30 pl-3 text-xs italic text-fg/90">
                       &ldquo;{selectedDiscrepancy.referenceExcerpt}&rdquo;
                     </blockquote>
                   </div>
@@ -436,7 +436,7 @@ export default function Campus() {
                     Derived from student queries, grievance tickets, and repeated verification clicks under strict $k$-anonymity ($k \ge 10$).
                   </p>
                 </div>
-                <div className="badge border-emerald-500/30 text-emerald-400 text-xs">
+                <div className="badge border-white/20 text-white text-xs">
                   Differential Privacy: Active
                 </div>
               </div>
@@ -462,7 +462,7 @@ export default function Campus() {
                               ? "border-red-500/40 text-red-400"
                               : d.score > 70
                               ? "border-amber-500/40 text-amber-400"
-                              : "border-emerald-500/40 text-emerald-400"
+                              : "border-white/20 text-white"
                           }`}
                         >
                           {d.score > 85 ? "High Friction" : d.score > 70 ? "Moderate" : "Nominal"}
@@ -474,7 +474,7 @@ export default function Campus() {
                     <div className="mt-3 h-1.5 w-full rounded-full bg-line overflow-hidden">
                       <div
                         className={`h-full ${
-                          d.score > 85 ? "bg-red-400" : d.score > 70 ? "bg-amber-400" : "bg-emerald-400"
+                          d.score > 85 ? "bg-red-400" : d.score > 70 ? "bg-amber-400" : "bg-white"
                         }`}
                         style={{ width: `${d.score}%` }}
                       />
@@ -505,13 +505,13 @@ export default function Campus() {
                 { title: "Cryptographic Registrar Timestamp", desc: "Attaches a verifiable digital signature or authenticated hash for tamper prevention.", pass: true }
               ].map((item, idx) => (
                 <div key={idx} className="flex items-start gap-3 rounded-xl border border-line p-4 bg-card/60">
-                  <div className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full ${item.pass ? "bg-emerald-500/20 text-emerald-400" : "bg-amber-500/20 text-amber-400"}`}>
+                  <div className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full ${item.pass ? "bg-white/10 text-white" : "bg-amber-500/20 text-amber-400"}`}>
                     {item.pass ? <Check size={12} strokeWidth={3} /> : <AlertTriangle size={12} strokeWidth={2.5} />}
                   </div>
                   <div className="flex-1">
                     <div className="flex items-center justify-between">
                       <span className="text-sm font-semibold">{item.title}</span>
-                      <span className={`badge text-[10px] ${item.pass ? "border-emerald-500/30 text-emerald-400" : "border-amber-500/30 text-amber-400"}`}>
+                      <span className={`badge text-[10px] ${item.pass ? "border-white/20 text-white" : "border-amber-500/30 text-amber-400"}`}>
                         {item.pass ? "Passes Audit" : "Requires Attention"}
                       </span>
                     </div>
