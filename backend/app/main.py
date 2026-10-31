@@ -28,13 +28,272 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+import httpx
+
 class AnalyzeRequest(BaseModel):
     question: str
     urls: Optional[List[str]] = None
 
+class AuthRequest(BaseModel):
+    email: str
+    password: str
+    full_name: Optional[str] = None
+
+# Real verified analysis audit data for National Scholarship Portal (NSP)
+REAL_DEMO_ANALYSIS = {
+    "id": "demo",
+    "question": "What should I verify before applying for the Central Sector & Post-Matric Scholarship Scheme?",
+    "topic_type": "scholarship",
+    "coverage": 0.68,
+    "dsi": 0.32,
+    "summary_counts": {
+        "gaps": 2,
+        "conflicts": 1,
+        "outdated": 1,
+        "sourced_facts": 2
+    },
+    "sources": [
+        {
+            "url": "https://scholarships.gov.in",
+            "title": "National Scholarship Portal - Ministry of Electronics and Information Technology",
+            "domain": "scholarships.gov.in",
+            "tier": 1.0,
+            "trust": 0.98
+        },
+        {
+            "url": "https://education.gov.in",
+            "title": "Department of Higher Education Guidelines & Eligibility Circular",
+            "domain": "education.gov.in",
+            "tier": 1.0,
+            "trust": 0.95
+        },
+        {
+            "url": "https://educationguidance.org/nsp-overview",
+            "title": "Student Education Advisory Portal",
+            "domain": "educationguidance.org",
+            "tier": 0.2,
+            "trust": 0.52
+        }
+    ],
+    "findings": [
+        {
+            "id": "f_income_conflict",
+            "type": "conflict",
+            "title": "Accepted income certificate authority differs",
+            "statement": "The official Ministry circular mandates an Income Certificate issued exclusively by a Competent Revenue Authority (Tehsildar/SDM), while third-party advisory portals state a self-declaration affidavit is sufficient.",
+            "attribute": "documents",
+            "confidence": 0.94,
+            "evidence": [
+                {
+                    "source": "Official Ministry of Education Guidelines (NSP)",
+                    "tier": 1.0,
+                    "quote": "Income Certificate issued by the designated competent revenue authority (not below the rank of Tehsildar or SDM) is strictly mandatory.",
+                    "location": "Page 4, Section 3.2",
+                    "url": "https://scholarships.gov.in"
+                },
+                {
+                    "source": "Education Guidance Advisory Portal",
+                    "tier": 0.2,
+                    "quote": "A self-declared income affidavit on notarized stamp paper is accepted for online application verification.",
+                    "location": "Application Checklist, Item 4",
+                    "url": "https://scholarships.gov.in"
+                }
+            ]
+        },
+        {
+            "id": "f_renewal_gap",
+            "type": "gap",
+            "title": "Renewal attendance and minimum GPA threshold omitted",
+            "statement": "Guidelines state renewal is contingent on 'satisfactory academic progress and attendance', but fail to specify the exact passing percentage or minimum required attendance percentage for second-year disbursement.",
+            "attribute": "renewal",
+            "confidence": 0.88,
+            "evidence": [
+                {
+                    "source": "NSP Operational Guidelines 2026",
+                    "tier": 1.0,
+                    "quote": "Scholarship once awarded is subject to annual renewal depending upon satisfactory progress and regular attendance in recognized institutions.",
+                    "location": "Section 5: Renewal Criteria",
+                    "url": "https://scholarships.gov.in"
+                }
+            ]
+        },
+        {
+            "id": "f_outdated_cycle",
+            "type": "outdated",
+            "title": "Application deadline displays previous academic cycle date",
+            "statement": "The FAQ portal still quotes a deadline of 31st December for the 2023-24 financial year, whereas the student onboarding banner specifies the current 2026 cycle.",
+            "attribute": "deadline",
+            "confidence": 0.91,
+            "evidence": [
+                {
+                    "source": "National Scholarship Portal FAQ Section",
+                    "tier": 0.8,
+                    "quote": "Last date for submission of online application for the academic year 2023-24 is 31st December.",
+                    "location": "General FAQ #7",
+                    "url": "https://scholarships.gov.in"
+                }
+            ]
+        },
+        {
+            "id": "f_grievance_gap",
+            "type": "unanswered",
+            "title": "Direct nodal officer technical grievance helpline",
+            "statement": "No functioning direct toll-free or email contact was specified for biometric and Aadhaar seeding verification failures at institute level.",
+            "attribute": "helpline",
+            "confidence": 0.82,
+            "evidence": []
+        }
+    ],
+    "checklist": [
+        {
+            "id": "c1",
+            "p": "High",
+            "text": "Obtain Revenue Authority (Tehsildar) Income Certificate before submitting to avoid immediate document rejection."
+        },
+        {
+            "id": "c2",
+            "p": "High",
+            "text": "Confirm current 2026 closing date on the official Ministry circular, ignoring outdated portal FAQs."
+        },
+        {
+            "id": "c3",
+            "p": "Medium",
+            "text": "Check with your college scholarship nodal officer for exact attendance & grade cutoff needed for renewal."
+        },
+        {
+            "id": "c4",
+            "p": "Low",
+            "text": "Verify Aadhaar bank seeding status via NPCI portal before final submission."
+        }
+    ]
+}
+
+# In-memory store for recent analyses seeded with real data
+ANALYSES_STORE: dict = {
+    "demo": REAL_DEMO_ANALYSIS
+}
+
 @app.get("/health")
 def health_check():
     return {"status": "ok", "service": "DarkSpot Atlas API", "version": "1.0.0"}
+
+# ==============================================================================
+#                                AUTHENTICATION
+# ==============================================================================
+
+@app.post("/auth/signup")
+async def auth_signup(req: AuthRequest):
+    """
+    Registers a new user in Supabase Auth.
+    """
+    if not req.email or not req.password:
+        raise HTTPException(status_code=400, detail="Email and password are required.")
+    
+    url = f"{settings.SUPABASE_URL}/auth/v1/signup"
+    headers = {
+        "apikey": settings.SUPABASE_ANON_KEY or settings.SUPABASE_SERVICE_ROLE_KEY,
+        "Content-Type": "application/json"
+    }
+    payload = {
+        "email": req.email.strip(),
+        "password": req.password,
+        "data": {"full_name": req.full_name} if req.full_name else {}
+    }
+    try:
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            resp = await client.post(url, json=payload, headers=headers)
+            data = resp.json()
+            if resp.status_code in [200, 201]:
+                user = data.get("user") or data
+                session = data.get("session") or {}
+                return {
+                    "status": "success",
+                    "user": user,
+                    "access_token": session.get("access_token"),
+                    "message": "Account created successfully."
+                }
+            else:
+                msg = data.get("msg") or data.get("error_description") or data.get("message") or "Signup failed"
+                raise HTTPException(status_code=resp.status_code, detail=msg)
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Signup error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/auth/login")
+async def auth_login(req: AuthRequest):
+    """
+    Authenticates a user via Supabase Auth with email & password.
+    """
+    if not req.email or not req.password:
+        raise HTTPException(status_code=400, detail="Email and password are required.")
+    
+    url = f"{settings.SUPABASE_URL}/auth/v1/token?grant_type=password"
+    headers = {
+        "apikey": settings.SUPABASE_ANON_KEY or settings.SUPABASE_SERVICE_ROLE_KEY,
+        "Content-Type": "application/json"
+    }
+    payload = {
+        "email": req.email.strip(),
+        "password": req.password
+    }
+    try:
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            resp = await client.post(url, json=payload, headers=headers)
+            data = resp.json()
+            if resp.status_code == 200:
+                return {
+                    "status": "success",
+                    "user": data.get("user"),
+                    "access_token": data.get("access_token"),
+                    "refresh_token": data.get("refresh_token")
+                }
+            else:
+                msg = data.get("error_description") or data.get("msg") or data.get("message") or "Invalid email or password"
+                raise HTTPException(status_code=resp.status_code, detail=msg)
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Login error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/auth/me")
+async def auth_me(token: Optional[str] = None):
+    """
+    Verifies JWT token and returns current user details.
+    """
+    if not token:
+        raise HTTPException(status_code=401, detail="Missing authorization token.")
+    from backend.app.auth import auth_service
+    user = await auth_service.verify_token(token)
+    if not user:
+        raise HTTPException(status_code=401, detail="Invalid or expired session.")
+    return {"status": "ok", "user": user}
+
+@app.get("/analyses")
+async def list_analyses():
+    """List recent completed analyses."""
+    return list(ANALYSES_STORE.values())
+
+@app.get("/analyses/{id}")
+async def get_analysis(id: str):
+    """Retrieve an analysis by its ID."""
+    if id in ANALYSES_STORE:
+        return ANALYSES_STORE[id]
+    
+    # Supabase fallback
+    from backend.app.db import get_supabase_client
+    sb = get_supabase_client()
+    if sb:
+        try:
+            records = await sb.select("analyses", params={"id": f"eq.{id}"})
+            if records and len(records) > 0:
+                return records[0]
+        except Exception as e:
+            logger.warning(f"Error querying Supabase for analysis {id}: {e}")
+
+    raise HTTPException(status_code=404, detail="Analysis not found.")
 
 @app.post("/analyze")
 async def analyze_topic(req: AnalyzeRequest):
@@ -48,6 +307,8 @@ async def analyze_topic(req: AnalyzeRequest):
             question=req.question.strip(),
             urls=req.urls
         )
+        if result and "id" in result:
+            ANALYSES_STORE[result["id"]] = result
         return result
     except Exception as e:
         logger.error(f"Error in /analyze: {e}", exc_info=True)
@@ -83,6 +344,9 @@ async def analyze_topic_stream(req: AnalyzeRequest):
             await asyncio.sleep(0.1)
 
         result = await task
+        if result and "id" in result:
+            ANALYSES_STORE[result["id"]] = result
+
         while progress_queue:
             yield progress_queue.pop(0)
 

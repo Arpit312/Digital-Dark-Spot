@@ -1,0 +1,2 @@
+import Prose from "@/components/Prose";
+export default function Docs() { return <Prose title="Docs" sections={[["Getting started", "Enter a question, add sources, and run the analysis. Open any finding to see its evidence."], ["Labels", "Potential gap, possible conflict, possibly outdated and unanswered are signals to verify, not final facts."], ["Not found", "When nothing is found, the report says not found in the sources reviewed."]]} />; }
