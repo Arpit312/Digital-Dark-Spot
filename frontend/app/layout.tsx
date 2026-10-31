@@ -2,7 +2,6 @@ import "./globals.css";
 import { Inter, JetBrains_Mono, Noto_Sans_Devanagari } from "next/font/google";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import SmoothScroll from "@/components/SmoothScroll";
 import InteractiveGridBackground from "@/components/InteractiveGridBackground";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
@@ -19,11 +18,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" className={`${inter.variable} ${mono.variable} ${hindi.variable}`}>
       <body className="relative bg-black text-fg font-sans antialiased selection:bg-white selection:text-black">
         <InteractiveGridBackground />
-        <SmoothScroll>
-          <Navbar />
-          <main className="min-h-screen pt-16">{children}</main>
-          <Footer />
-        </SmoothScroll>
+        <Navbar />
+        <main className="min-h-screen pt-16">{children}</main>
+        <Footer />
       </body>
     </html>
   );

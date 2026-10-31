@@ -1,0 +1,32 @@
+# Node modules (frontend, admin, app)
+**/node_modules/
+**/.next/
+**/.expo/
+
+# Python
+**/__pycache__/
+**/*.pyc
+**/.venv/
+**/venv/
+
+# Git
+.git/
+.gitignore
+
+# IDE
+.vscode/
+.idea/
+
+# Docs
+docs/
+*.md
+!backend/requirements.txt
+
+# Frontend & App (not needed in backend Docker)
+frontend/
+darkspot-admin/
+darkspot-app/
+
+# Misc
+*.log
+.env.example

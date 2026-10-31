@@ -151,7 +151,7 @@ export default function SideDrawer({ open, onClose }: SideDrawerProps) {
         }`}
       >
         {/* Top Header */}
-        <div className="flex h-16 shrink-0 items-center justify-between border-b border-white/10 px-6">
+        <div className="flex h-16 shrink-0 items-center justify-between border-b border-white/10 px-5 sm:px-6">
           <div className="flex items-center gap-3">
             <Logo size={26} />
             <span className="rounded-full border border-white/15 bg-white/5 px-2 py-0.5 text-[10px] font-mono font-medium text-white">
@@ -168,7 +168,7 @@ export default function SideDrawer({ open, onClose }: SideDrawerProps) {
         </div>
 
         {/* Scrollable Content */}
-        <div className="flex-1 overflow-y-auto px-5 py-6 space-y-6">
+        <div className="flex-1 space-y-7 overflow-y-auto px-5 py-6 sm:px-6">
           {/* User Snapshot Card */}
           <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 relative overflow-hidden">
             <div className="flex items-center gap-3.5">
@@ -232,7 +232,7 @@ export default function SideDrawer({ open, onClose }: SideDrawerProps) {
           </div>
 
           {/* Navigation Items (clean monochrome) */}
-          <div className="space-y-1">
+          <div className="space-y-1.5">
             <div className="px-2 pb-2 text-[11px] font-mono tracking-wider uppercase text-muted">
               Navigation & Workspaces
             </div>
@@ -244,10 +244,11 @@ export default function SideDrawer({ open, onClose }: SideDrawerProps) {
                   key={item.href}
                   href={item.href}
                   onClick={onClose}
-                  className={`group flex items-center gap-3.5 rounded-xl px-3.5 py-2.5 transition-all duration-150 ${
+                  aria-current={active ? "page" : undefined}
+                  className={`group flex items-center gap-3.5 rounded-xl border px-3.5 py-3 transition-all duration-150 ${
                     active
-                      ? "bg-white/10 text-white border border-white/15"
-                      : "text-muted hover:bg-white/5 hover:text-white"
+                      ? "border-white/15 bg-white/10 text-white"
+                      : "border-transparent text-muted hover:border-white/10 hover:bg-white/5 hover:text-white"
                   }`}
                 >
                   <div

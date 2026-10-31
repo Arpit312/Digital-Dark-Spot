@@ -11,9 +11,10 @@ export default function InteractiveGridBackground() {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    let animationFrameId: number;
+    let animationFrameId: number | null = null;
     let width = (canvas.width = window.innerWidth);
     let height = (canvas.height = window.innerHeight);
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     // Mouse coordinates with smooth lerp interpolation
     const mouse = {
@@ -36,6 +37,7 @@ export default function InteractiveGridBackground() {
       if (!canvas) return;
       width = canvas.width = window.innerWidth;
       height = canvas.height = window.innerHeight;
+      scheduleDraw();
     };
 
     const handleMouseMove = (e: MouseEvent) => {
@@ -47,31 +49,25 @@ export default function InteractiveGridBackground() {
       const centerY = height / 2;
       gridOffset.targetX = ((e.clientX - centerX) / centerX) * 24;
       gridOffset.targetY = ((e.clientY - centerY) / centerY) * 24;
+      scheduleDraw();
     };
 
-    window.addEventListener("resize", handleResize);
-    window.addEventListener("mousemove", handleMouseMove, { passive: true });
-
-    let time = 0;
+    window.addEventListener("resize", handleResize, { passive: true });
+    if (!prefersReducedMotion) {
+      window.addEventListener("mousemove", handleMouseMove, { passive: true });
+    }
     const gridSize = 48; // Crisp 48px grid units
 
     const render = () => {
-      time += 0.008;
-
-      // Smooth lerp easing
-      mouse.x += (mouse.targetX - mouse.x) * 0.07;
-      mouse.y += (mouse.targetY - mouse.y) * 0.07;
-      gridOffset.x += (gridOffset.targetX - gridOffset.x) * 0.05;
-      gridOffset.y += (gridOffset.targetY - gridOffset.y) * 0.05;
-
-      // Gentle ambient wave breathing
-      const ambientX = Math.sin(time) * 6;
-      const ambientY = Math.cos(time * 0.8) * 6;
+      mouse.x += (mouse.targetX - mouse.x) * 0.16;
+      mouse.y += (mouse.targetY - mouse.y) * 0.16;
+      gridOffset.x += (gridOffset.targetX - gridOffset.x) * 0.12;
+      gridOffset.y += (gridOffset.targetY - gridOffset.y) * 0.12;
 
       ctx.clearRect(0, 0, width, height);
 
-      const totalOffsetX = (gridOffset.x + ambientX) % gridSize;
-      const totalOffsetY = (gridOffset.y + ambientY) % gridSize;
+      const totalOffsetX = gridOffset.x % gridSize;
+      const totalOffsetY = gridOffset.y % gridSize;
 
       // 1. Draw subtle base vertical lines
       ctx.lineWidth = 1;
@@ -139,13 +135,29 @@ export default function InteractiveGridBackground() {
       ctx.fillStyle = gradient;
       ctx.fillRect(0, 0, width, height);
 
-      animationFrameId = requestAnimationFrame(render);
+      const stillMoving =
+        Math.abs(mouse.targetX - mouse.x) > 0.5 ||
+        Math.abs(mouse.targetY - mouse.y) > 0.5 ||
+        Math.abs(gridOffset.targetX - gridOffset.x) > 0.5 ||
+        Math.abs(gridOffset.targetY - gridOffset.y) > 0.5;
+
+      if (stillMoving) {
+        animationFrameId = requestAnimationFrame(render);
+      } else {
+        animationFrameId = null;
+      }
     };
+
+    function scheduleDraw() {
+      if (animationFrameId === null) {
+        animationFrameId = requestAnimationFrame(render);
+      }
+    }
 
     render();
 
     return () => {
-      cancelAnimationFrame(animationFrameId);
+      if (animationFrameId !== null) cancelAnimationFrame(animationFrameId);
       window.removeEventListener("resize", handleResize);
       window.removeEventListener("mousemove", handleMouseMove);
     };

@@ -38,7 +38,9 @@ export default function Signup() {
     setError("");
     const res = await authSignup(email, pw, name);
     setLoading(false);
-    if (res.success) {
+    if (res.success && res.requiresEmailConfirmation) {
+      setSuccess("Account created. Check your email to confirm it, then sign in.");
+    } else if (res.success) {
       setSuccess("Account created successfully! Redirecting...");
       setTimeout(() => {
         router.push("/reports");

@@ -24,7 +24,9 @@ class OrchestratorAgent:
         question: str,
         urls: Optional[List[str]] = None,
         raw_documents: Optional[List[Dict[str, Any]]] = None,
-        progress_callback = None
+        progress_callback=None,
+        user_id: Optional[str] = None,
+        persist: bool = False,
     ) -> Dict[str, Any]:
         """
         Runs the complete multi-agent pipeline:
@@ -71,17 +73,7 @@ class OrchestratorAgent:
             sources.extend(searched)
 
         if not sources:
-            # Fallback placeholder if offline
-            sources.append({
-                "url": "https://scholarships.gov.in",
-                "title": "National Scholarship Portal",
-                "domain": "scholarships.gov.in",
-                "tier": 1.0,
-                "text": "National Scholarship Portal application guidelines. Deadlines for post-matric and pre-matric scholarships.",
-                "sha256": "default_nsp_sha",
-                "published_at": None,
-                "trust": 0.95
-            })
+            raise RuntimeError("No live or uploaded source content was available for this analysis.")
 
         await report_progress("claim_extraction", f"Extracting verified claims from {len(sources)} sources with quote verification...")
 
@@ -161,20 +153,32 @@ class OrchestratorAgent:
             "heatmap": heatmap_matrix
         }
 
-        # Optional Supabase persistence
-        sb = get_supabase_client()
-        if sb:
-            try:
-                await sb.insert("analyses", {
-                    "id": analysis_id,
-                    "question": question,
-                    "topic_type": topic_type,
-                    "coverage": gap_res["coverage"],
-                    "dsi": gap_res["dsi"],
-                    "status": "completed"
+        if persist:
+            sb = get_supabase_client()
+            if not sb:
+                raise RuntimeError("Supabase database is not configured.")
+            await sb.insert("analyses", {
+                "id": analysis_id,
+                "user_id": user_id,
+                "question": question,
+                "topic_type": topic_type,
+                "coverage": gap_res["coverage"],
+                "dsi": gap_res["dsi"],
+                "status": "completed",
+                "result": analysis_payload,
+            })
+            for source in sources:
+                await sb.insert("sources", {
+                    "analysis_id": analysis_id,
+                    "url": source.get("url"),
+                    "title": source.get("title"),
+                    "domain": source.get("domain"),
+                    "tier": source.get("tier", 0.2),
+                    "text": source.get("text", ""),
+                    "sha256": source.get("sha256"),
+                    "published_at": source.get("published_at"),
+                    "trust": source.get("trust", 0.5),
                 })
-            except Exception as e:
-                logger.warning(f"Could not persist analysis to Supabase: {e}")
 
         await report_progress("completed", "Analysis complete. Atlas generated.")
 

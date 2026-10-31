@@ -12,7 +12,6 @@ import {
   ShieldCheck,
   Search,
   Sparkles,
-  PhoneCall,
   Mail,
   ChevronDown,
   ChevronUp,
@@ -42,32 +41,32 @@ const FAQ_ITEMS = [
   {
     q: "How does DarkSpot Atlas find information gaps and contradictions?",
     category: "Audit Pipeline",
-    a: "DarkSpot Atlas utilizes an 8-agent pipeline. Agent 01 (Scout) collects official circulars from verified portals (.gov.in, .nic.in). Agent 03 (Corroborator) and Agent 04 (Discrepancy Auditor) cross-reference specific eligibility criteria, income ceilings, and deadlines. Any mismatch is red-teamed by Agent 06 and certified with verbatim substring character offsets."
+    a: "An analysis searches or fetches source material, extracts claims, checks for gaps and conflicts, and returns findings with source evidence. Results are saved to your account when the analysis completes."
   },
   {
     q: "What should I do if my analysis request seems slow or stuck?",
     category: "Troubleshooting",
-    a: "Deep audits stream multi-agent events via SSE (/analyze/stream). If an official government server is throttling requests, the system automatically falls back to cached verified datasets. You can also purge local cached tokens in Settings > Purge Cache, or check system health on this page."
+    a: "Analysis requires the API, source-search provider, and database to be available. Check the error shown on the Analyze page and retry; the app does not replace failed results with sample data."
   },
   {
     q: "How does the Dark Spot Index (DSI) work?",
     category: "Audit Pipeline",
-    a: "DSI is calculated as DSI = (Gaps + Conflicts * 2 + Outdated) / (Total Sourced Facts). A DSI below 0.15 indicates high clarity and consistent public policy. A DSI above 0.30 indicates significant dark spots where citizens risk application rejection due to contradictory rules."
+    a: "The Dark Spot Index is calculated by the analysis pipeline from its coverage result. Review each finding and its linked evidence; the index is not a guarantee of policy correctness."
   },
   {
     q: "How can I upload a PDF circular or scheme guideline?",
     category: "Platform Usage",
-    a: "Navigate to the Analyze page, click 'Upload Official PDF Circular', and drag in your document. The server parses text, computes cryptographic checksums, and cross-checks every clause against known portal announcements."
+    a: "Use the upload control on the Analyze page to extract PDF text. The extracted content must then be included in an analysis to generate findings."
   },
   {
     q: "How do I link my Google account or verify my phone number?",
     category: "Account & Profile",
-    a: "Go to your Profile page (accessible by clicking the DarkSpot logo or top right profile circle). Under 'Mobile / Phone Number', click 'Verify with OTP' to receive an instant verification code. Under 'Google Account', click 'Continue with Google' to enable 1-click authentication."
+    a: "Phone OTP delivery and Google account linking are not configured in this deployment. Do not treat either option as verified until a provider is configured."
   },
   {
     q: "How does an Officer dispatch work for emergency discrepancies?",
     category: "Officer Workflows",
-    a: "Field and Nodal Officers can access the Officer Control Deck (/officer) to issue immediate administrative directives, flag erroneous circulars, and dispatch field inspectors to verify local institution compliance."
+    a: "Officer analytics are available only to accounts with an officer or admin role. Dispatch and directive workflows are not currently connected."
   }
 ];
 
@@ -89,12 +88,13 @@ export default function SupportPage() {
     {
       id: "msg-1",
       sender: "bot",
-      text: "Namaste! Welcome to the DarkSpot Atlas Resolution & Support Hub. I am your 24/7 AI System Assistant. Ask me any question or report any problem regarding our website, audit pipelines, login, or public data discrepancies.",
+      text: "This assistant searches the published support FAQs. For issues not covered there, submit a support ticket.",
       time: "Just now"
     }
   ]);
   const [inputQuery, setInputQuery] = useState("");
-  const [isBotThinking, setIsBotThinking] = useState(false);
+  const [backendStatus, setBackendStatus] = useState("Checking...");
+  const [ticketError, setTicketError] = useState("");
 
   // Ticket Submission Form State
   const [category, setCategory] = useState("Website Error / Technical Bug");
@@ -115,6 +115,9 @@ export default function SupportPage() {
     if (u?.email) setTicketEmail(u.email);
 
     loadTickets();
+    fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/health`, { cache: "no-store" })
+      .then((response) => setBackendStatus(response.ok ? "Connected" : "Unavailable"))
+      .catch(() => setBackendStatus("Unavailable"));
   }, []);
 
   const loadTickets = async () => {
@@ -122,8 +125,9 @@ export default function SupportPage() {
     try {
       const list = await getSupportTickets();
       setTickets(list);
-    } catch {
-      // fallback
+      setTicketError("");
+    } catch (error: any) {
+      setTicketError(error.message || "Could not load support tickets.");
     } finally {
       setLoadingTickets(false);
     }
@@ -143,44 +147,19 @@ export default function SupportPage() {
 
     setMessages((prev) => [...prev, userMsg]);
     if (!textToSend) setInputQuery("");
-    setIsBotThinking(true);
-
-    setTimeout(() => {
-      const lower = q.toLowerCase();
-      let botReply = "";
-      let actions: Array<{ label: string; href?: string }> = [];
-
-      if (lower.includes("login") || lower.includes("sign in") || lower.includes("password")) {
-        botReply = "For login issues: DarkSpot Atlas uses Supabase Cryptographic JWT authentication. Ensure your email is registered via /signup. You can also link your Google Account on the Profile page for instant 1-click passwordless sign-in.";
-        actions = [{ label: "Open Profile Page", href: "/profile" }, { label: "Go to Login", href: "/login" }];
-      } else if (lower.includes("phone") || lower.includes("otp") || lower.includes("mobile")) {
-        botReply = "Phone verification is managed on your Profile page. Click 'Verify with OTP' to receive a simulated 6-digit test code (with instant Auto-Fill) to verify your contact for critical circular notifications.";
-        actions = [{ label: "Manage Phone on Profile", href: "/profile" }];
-      } else if (lower.includes("scholarship") || lower.includes("date") || lower.includes("conflict")) {
-        botReply = "Contradictory dates occur when government portal homepages show old dates while gazettes or FAQs extend deadlines. You can run an audit on /analyze or review the verified NSP scholarship checklist on /reports.";
-        actions = [{ label: "Analyze Scholarship", href: "/analyze" }, { label: "View Reports", href: "/reports" }];
-      } else if (lower.includes("upload") || lower.includes("pdf") || lower.includes("circular")) {
-        botReply = "You can upload official circular PDFs on either the Analyze page or Campus Mode. The document is parsed with PyMuPDF layout-aware OCR and audited for missing clauses.";
-        actions = [{ label: "Campus Notice Scanner", href: "/campus" }, { label: "Analyze PDF", href: "/analyze" }];
-      } else if (lower.includes("quote") || lower.includes("hallucination") || lower.includes("accuracy")) {
-        botReply = "Our Zero-Hallucination Gate enforces 100% exact substring matching. If an AI finding cannot be matched verbatim against source text with exact character offsets, it is discarded immediately. Our benchmark F1 score is 85%.";
-        actions = [{ label: "View Accuracy Benchmarks", href: "/accuracy" }, { label: "8-Agent Architecture", href: "/how-it-works" }];
-      } else {
-        botReply = `I have logged your question regarding "${q}". If this is a specific bug or conflicting portal guideline, please submit a formal Support Ticket below and our engineering team will inspect the source records within 15 minutes.`;
-        actions = [{ label: "View FAQs", href: "#faq-section" }];
-      }
-
-      const botMsg: ChatMessage = {
-        id: `b-${Date.now()}`,
-        sender: "bot",
-        text: botReply,
-        time: "Just now",
-        actions
-      };
-
-      setMessages((prev) => [...prev, botMsg]);
-      setIsBotThinking(false);
-    }, 700);
+    const terms = q.toLowerCase().split(/\W+/).filter((term) => term.length > 2);
+    const match = FAQ_ITEMS.find((item) =>
+      terms.some((term) => `${item.q} ${item.a}`.toLowerCase().includes(term))
+    );
+    setMessages((prev) => [...prev, {
+      id: `b-${Date.now()}`,
+      sender: "bot",
+      text: match ? match.a : "No FAQ matched that question. Submit a support ticket below for follow-up.",
+      time: "Now",
+      actions: match
+        ? [{ label: "Open FAQ", href: "#faq-section" }]
+        : [{ label: "Submit a ticket", href: "#ticket-form" }],
+    }]);
   };
 
   // Submit Ticket Handler
@@ -190,6 +169,7 @@ export default function SupportPage() {
 
     setSubmittingTicket(true);
     setTicketSuccessMsg("");
+    setTicketError("");
 
     try {
       const res = await createSupportTicket({
@@ -197,17 +177,19 @@ export default function SupportPage() {
         priority,
         subject,
         description,
-        email: ticketEmail || "user@darkspotatlas.org"
+        email: ticketEmail || undefined
       });
 
       if (res.success && res.ticket) {
         setTickets((prev) => [res.ticket!, ...prev]);
-        setTicketSuccessMsg(`Support Ticket ${res.ticket.id} registered! Assigned to Support & Engineering Desk.`);
+        setTicketSuccessMsg(`Support ticket ${res.ticket.id} was saved.`);
         setSubject("");
         setDescription("");
+      } else {
+        setTicketError(res.error || "Could not create support ticket.");
       }
-    } catch {
-      setTicketSuccessMsg("Ticket created in local triage buffer.");
+    } catch (error: any) {
+      setTicketError(error.message || "Could not create support ticket.");
     } finally {
       setSubmittingTicket(false);
       setTimeout(() => setTicketSuccessMsg(""), 6000);
@@ -225,21 +207,21 @@ export default function SupportPage() {
     <div className="min-h-screen pb-24">
       <PageHeader
         eyebrow="SUPPORT & RESOLUTION DESK"
-        title="Customer Support & Query Resolver"
-        sub="Instant AI website query solver, priority discrepancy triage tickets, and verified portal problem resolution."
+        title="Support & tickets"
+        sub="Search the help articles or submit a ticket. Ticket status is stored with your account."
       />
 
       <div className="mx-auto max-w-5xl space-y-10 px-5 py-8">
-        {/* Top Emergency Channels & Status Bar (Clean Monochrome) */}
+        {/* Support and service status */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           <div className="card p-5 border-white/10 bg-white/[0.02] flex items-start gap-3.5">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/10 text-white border border-white/10">
-              <PhoneCall size={18} />
+              <LifeBuoy size={18} />
             </div>
             <div>
-              <div className="text-xs font-mono uppercase text-white font-semibold">Toll-Free Helpline</div>
-              <div className="text-sm font-semibold text-white mt-0.5">1800-DARK-SPOT</div>
-              <div className="text-[11px] text-muted">1800-3275-7768 (Toll Free 24/7)</div>
+              <div className="text-xs font-mono uppercase text-white font-semibold">Support tickets</div>
+              <div className="text-sm font-semibold text-white mt-0.5">Account-linked</div>
+              <div className="text-[11px] text-muted">Submit an issue below</div>
             </div>
           </div>
 
@@ -248,9 +230,9 @@ export default function SupportPage() {
               <Mail size={18} />
             </div>
             <div>
-              <div className="text-xs font-mono uppercase text-white font-semibold">Email Helpdesk</div>
-              <div className="text-sm font-semibold text-white mt-0.5">support@darkspotatlas.org</div>
-              <div className="text-[11px] text-muted">Priority response under 15 mins</div>
+              <div className="text-xs font-mono uppercase text-white font-semibold">Ticket updates</div>
+              <div className="text-sm font-semibold text-white mt-0.5">Saved to your account</div>
+              <div className="text-[11px] text-muted">Check status in this page</div>
             </div>
           </div>
 
@@ -259,14 +241,14 @@ export default function SupportPage() {
               <ShieldCheck size={18} />
             </div>
             <div>
-              <div className="text-xs font-mono uppercase text-white font-semibold">Atlas Network Status</div>
-              <div className="text-sm font-semibold text-white mt-0.5">All Systems Operational</div>
-              <div className="text-[11px] text-muted">99.98% Verification SLA Uptime</div>
+              <div className="text-xs font-mono uppercase text-white font-semibold">API status</div>
+              <div className="text-sm font-semibold text-white mt-0.5">{backendStatus}</div>
+              <div className="text-[11px] text-muted">Live health endpoint</div>
             </div>
           </div>
         </div>
 
-        {/* SECTION 1: Interactive AI Query Resolver / Support Assistant */}
+        {/* SECTION 1: FAQ search */}
         <div className="card p-6 sm:p-7 space-y-6 border-white/10 bg-card/90 shadow-2xl relative overflow-hidden">
           <div className="flex items-center justify-between border-b border-line pb-4">
             <div className="flex items-center gap-3">
@@ -275,12 +257,12 @@ export default function SupportPage() {
               </div>
               <div>
                 <h3 className="text-base font-semibold text-white flex items-center gap-2">
-                  AI Website Query Resolver
+                  Search the support FAQs
                   <span className="rounded-full bg-white/10 border border-white/15 px-2 py-0.5 text-[10px] font-mono text-white">
-                    Live Assistant
+                    FAQ Search
                   </span>
                 </h3>
-                <p className="text-xs text-muted">Ask anything about website features, errors, DSI scores, or public circulars.</p>
+                <p className="text-xs text-muted">Answers are drawn from the published help articles.</p>
               </div>
             </div>
           </div>
@@ -364,12 +346,6 @@ export default function SupportPage() {
               </div>
             ))}
 
-            {isBotThinking && (
-              <div className="flex items-center gap-2 text-xs text-white font-mono animate-pulse">
-                <RefreshCw size={13} className="animate-spin" />
-                <span>AI Resolver analyzing query across portal knowledge base...</span>
-              </div>
-            )}
           </div>
 
           {/* Chat Input */}
@@ -379,7 +355,7 @@ export default function SupportPage() {
               value={inputQuery}
               onChange={(e) => setInputQuery(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleSendQuery()}
-              placeholder="Ask a question or explain your website issue..."
+              placeholder="Search the help articles..."
               className="input text-sm flex-1 text-white"
             />
             <button
@@ -410,7 +386,7 @@ export default function SupportPage() {
               </div>
             )}
 
-            <form onSubmit={handleTicketSubmit} className="space-y-4">
+            <form id="ticket-form" onSubmit={handleTicketSubmit} className="space-y-4">
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div className="space-y-1.5">
                   <label className="text-xs font-medium text-muted">Issue Category</label>
@@ -472,15 +448,16 @@ export default function SupportPage() {
                 <input
                   type="email"
                   value={ticketEmail}
-                  onChange={(e) => setTicketEmail(e.target.value)}
+                  readOnly
                   className="input text-sm text-white"
-                  required
                 />
               </div>
 
+              {ticketError && <p className="text-xs text-red-400" role="alert">{ticketError}</p>}
+
               <div className="flex items-center justify-between pt-2">
                 <div className="text-[11px] text-muted">
-                  SLA Target: Assigned to Tier-2 desk within 15 minutes.
+                  Sign in to submit and track a support ticket.
                 </div>
                 <button
                   type="submit"
@@ -504,7 +481,7 @@ export default function SupportPage() {
             <div className="flex items-center justify-between border-b border-line pb-3">
               <div className="flex items-center gap-2">
                 <Clock size={16} className="text-white" />
-                <h4 className="text-sm font-semibold text-white">Active Tickets</h4>
+                <h4 className="text-sm font-semibold text-white">Your tickets</h4>
               </div>
               <span className="rounded bg-white/10 px-1.5 py-0.5 text-[10px] font-mono text-muted">
                 {tickets.length} Registered
@@ -534,7 +511,7 @@ export default function SupportPage() {
 
                     <div className="flex items-center justify-between pt-1 border-t border-white/5 text-[10px] text-muted font-mono">
                       <span className="text-white font-medium">{t.status}</span>
-                      <span>SLA: {t.sla || "15 mins"}</span>
+                      <span>{t.created_at ? new Date(t.created_at).toLocaleDateString() : ""}</span>
                     </div>
                   </div>
                 ))

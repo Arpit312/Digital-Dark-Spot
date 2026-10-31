@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+from typing import List
 from dotenv import load_dotenv
 
 # Project root directory
@@ -37,6 +38,14 @@ class Settings:
         self.SUPABASE_JWT_SECRET: str = os.getenv("SUPABASE_JWT_SECRET", "").strip()
         self.SUPABASE_JWKS_URL: str = os.getenv("SUPABASE_JWKS_URL", "").strip()
         self.DATABASE_URL: str = os.getenv("DATABASE_URL", "").strip()
+        self.CORS_ORIGINS: List[str] = [
+            origin.strip()
+            for origin in os.getenv(
+                "CORS_ORIGINS",
+                "http://localhost:3000,http://localhost:3001,http://localhost:8081",
+            ).split(",")
+            if origin.strip()
+        ]
 
         # App options
         self.USE_LOCAL_NLI: bool = os.getenv("USE_LOCAL_NLI", "false").lower() == "true"

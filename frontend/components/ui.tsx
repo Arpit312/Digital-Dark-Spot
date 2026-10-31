@@ -1,10 +1,10 @@
 "use client";
 import { motion } from "framer-motion";
-export function Seg({ value, onChange, options, id }: { value: string; onChange: (v: string) => void; options: string[]; id: string }) {
+export function Seg({ value, onChange, options, id, className = "", optionClassName = "" }: { value: string; onChange: (v: string) => void; options: string[]; id: string; className?: string; optionClassName?: string }) {
   return (
-    <div className="inline-flex rounded-lg border border-line-strong bg-surface p-1">
+    <div className={`inline-flex rounded-lg border border-line-strong bg-surface p-1 ${className}`}>
       {options.map((o) => (
-        <button key={o} onClick={() => onChange(o)} className={`relative rounded-md px-3 py-1.5 text-sm transition-colors ${value === o ? "text-bg" : "text-muted hover:text-fg"}`}>
+        <button key={o} onClick={() => onChange(o)} className={`relative rounded-md px-3 py-1.5 text-sm transition-colors ${optionClassName} ${value === o ? "text-bg" : "text-muted hover:text-fg"}`}>
           {value === o && <motion.span layoutId={id} className="absolute inset-0 rounded-md bg-fg" transition={{ type: "spring", damping: 30, stiffness: 400 }} />}
           <span className="relative">{o}</span>
         </button>

@@ -12,13 +12,10 @@ interface PaletteItem {
 }
 
 const DEFAULT_ITEMS: PaletteItem[] = [
-  { id: "r-scholarship", label: "Scholarship checklist", section: "REPORTS", href: "/report/demo" },
-  { id: "r-admission", label: "Admission notice audit", section: "REPORTS", href: "/campus" },
-  { id: "r-scheme", label: "Scheme eligibility check", section: "REPORTS", href: "/reports" },
+  { id: "r-reports", label: "Your reports", section: "REPORTS", href: "/reports" },
   { id: "a-new", label: "New analysis", section: "ACTIONS", href: "/analyze" },
-  { id: "a-support", label: "Customer support & resolver", section: "ACTIONS", href: "/support" },
+  { id: "a-support", label: "Support", section: "ACTIONS", href: "/support" },
   { id: "a-profile", label: "User profile & settings", section: "ACTIONS", href: "/profile" },
-  { id: "a-campus", label: "Campus notice auditor", section: "ACTIONS", href: "/campus" }
 ];
 
 export default function CommandPalette({

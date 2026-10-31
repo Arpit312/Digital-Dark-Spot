@@ -1,0 +1,52 @@
+# ==============================================================================
+#  DarkSpot Atlas - Docker Compose Production Stack
+#  Orchestrates: FastAPI Backend + Health Monitoring
+# ==============================================================================
+
+version: "3.9"
+
+services:
+  # ============================================================================
+  # FastAPI Backend API Server
+  # ============================================================================
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: darkspot-backend
+    restart: unless-stopped
+    ports:
+      - "${PORT:-8000}:8000"
+    env_file:
+      - .env
+    environment:
+      - PYTHONPATH=/app
+      - HOST=0.0.0.0
+      - PORT=8000
+    volumes:
+      - backend-logs:/app/logs
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    networks:
+      - darkspot-net
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: "1.0"
+        reservations:
+          memory: 256M
+          cpus: "0.25"
+
+volumes:
+  backend-logs:
+    driver: local
+
+networks:
+  darkspot-net:
+    driver: bridge
+    name: darkspot-network

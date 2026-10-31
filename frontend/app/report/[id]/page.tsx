@@ -17,6 +17,7 @@ import {
   ArrowLeft
 } from "lucide-react";
 import Link from "next/link";
+import { useParams } from "next/navigation";
 import { getAnalysis, type AnalysisResult, type Finding } from "@/lib/api";
 
 const meta: Record<string, [any, string, string]> = {
@@ -29,7 +30,9 @@ const meta: Record<string, [any, string, string]> = {
 
 const tabs = ["All", "Gaps", "Conflicts", "Outdated", "Checklist", "Sources"];
 
-export default function ReportPage({ params }: { params: { id: string } }) {
+export default function ReportPage({ params }: { params?: any }) {
+  const routerParams = useParams();
+  const reportId = (routerParams?.id as string) || (params && typeof params === "object" && "id" in params ? params.id : "");
   const [data, setData] = useState<AnalysisResult | null>(null);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState("All");
@@ -38,10 +41,11 @@ export default function ReportPage({ params }: { params: { id: string } }) {
 
   useEffect(() => {
     let active = true;
+    if (!reportId) return;
     async function load() {
       setLoading(true);
       try {
-        const res = await getAnalysis(params.id);
+        const res = await getAnalysis(reportId);
         if (active) {
           setData(res);
         }
@@ -55,7 +59,7 @@ export default function ReportPage({ params }: { params: { id: string } }) {
     return () => {
       active = false;
     };
-  }, [params.id]);
+  }, [reportId]);
 
   if (loading) {
     return (

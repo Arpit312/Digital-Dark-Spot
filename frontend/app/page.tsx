@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { useRef, useState } from "react";
 import { motion, useScroll, useTransform, useMotionValueEvent } from "framer-motion";
-import { ArrowRight, CircleDashed, ArrowLeftRight, Clock } from "lucide-react";
+import { ArrowRight, CircleDashed, ArrowLeftRight, Clock, FileText, ShieldCheck } from "lucide-react";
 import WordReveal from "@/components/WordReveal";
 import Reveal from "@/components/Reveal";
 import Marquee from "@/components/Marquee";
@@ -49,21 +49,63 @@ export default function Home() {
   const rot = useTransform(scrollY, [0, 1000], [0, 90]);
   return (
     <div>
-      <section className="relative flex min-h-[88vh] flex-col items-center justify-center overflow-hidden px-5 text-center">
+      <section className="relative flex min-h-[calc(100svh-4rem)] flex-col items-center justify-center overflow-hidden px-5 py-16 text-center">
         <motion.svg style={{ rotate: rot }} className="pointer-events-none absolute -z-0 opacity-[0.04]" width="640" height="640" viewBox="0 0 28 28" fill="none">
           <rect x="3.5" y="5.5" width="21" height="3.2" rx="1.6" fill="#fff" />
           <rect x="3.5" y="12.4" width="7.2" height="3.2" rx="1.6" fill="#fff" />
           <rect x="17.3" y="12.4" width="7.2" height="3.2" rx="1.6" fill="#fff" />
           <rect x="3.5" y="19.3" width="21" height="3.2" rx="1.6" fill="#fff" />
         </motion.svg>
+        <motion.aside
+          aria-hidden="true"
+          animate={{ y: [0, -8, 0] }}
+          transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute left-7 top-[34%] hidden w-52 rounded-2xl border border-white/10 bg-black/70 p-4 text-left shadow-2xl backdrop-blur-md xl:block 2xl:left-[max(2rem,calc((100vw-80rem)/2))]"
+        >
+          <div className="flex items-center justify-between text-[10px] font-mono uppercase tracking-[0.16em] text-subtle">
+            <span>Source scan</span>
+            <span>01 / 03</span>
+          </div>
+          <div className="mt-4 flex items-center gap-3">
+            <span className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/10 bg-white/[0.03]">
+              <FileText size={16} className="text-muted" />
+            </span>
+            <div>
+              <div className="text-xs font-medium text-fg">Official documents</div>
+              <div className="mt-1 text-[10px] text-muted">Pages · circulars · PDFs</div>
+            </div>
+          </div>
+          <div className="mt-4 flex gap-1.5">
+            <span className="h-1 flex-1 rounded-full bg-white/70" />
+            <span className="h-1 flex-1 rounded-full bg-white/25" />
+            <span className="h-1 flex-1 rounded-full bg-white/10" />
+          </div>
+        </motion.aside>
+        <motion.aside
+          aria-hidden="true"
+          animate={{ y: [0, 8, 0] }}
+          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute right-7 top-[56%] hidden w-52 rounded-2xl border border-white/10 bg-black/70 p-4 text-left shadow-2xl backdrop-blur-md xl:block 2xl:right-[max(2rem,calc((100vw-80rem)/2))]"
+        >
+          <div className="flex items-center gap-2 text-[10px] font-mono uppercase tracking-[0.16em] text-subtle">
+            <ShieldCheck size={13} className="text-muted" />
+            <span>Evidence first</span>
+          </div>
+          <div className="mt-4 text-sm font-medium text-fg">Every finding has a source.</div>
+          <p className="mt-1.5 text-[11px] leading-relaxed text-muted">Review exact quotes and know what still needs checking.</p>
+          <div className="mt-4 flex items-center gap-2 border-t border-white/10 pt-3">
+            <span className="h-1.5 w-1.5 rounded-full bg-white" />
+            <span className="text-[10px] text-muted">A clear next step, every time</span>
+          </div>
+        </motion.aside>
         <div className="relative z-10 max-w-3xl">
           <Reveal y={10}><span className="badge mb-6">Digital Dark Spot</span></Reveal>
           <WordReveal text="Find what your sources forgot to tell you." className="h-display" />
           <Reveal delay={0.4}><p className="mx-auto mt-6 max-w-xl text-lg text-muted">Add the pages and PDFs you rely on. Get the gaps, conflicts and outdated details, each with its evidence, and a checklist of what to verify next.</p></Reveal>
           <Reveal delay={0.55}>
-            <form action="/analyze" className="mx-auto mt-9 flex max-w-xl gap-2">
-              <input name="q" className="input h-12" placeholder="What should I verify before applying for this scholarship?" />
-              <button className="btn-primary h-12 px-5">Analyze <ArrowRight size={16} /></button>
+            <form action="/analyze" className="mx-auto mt-9 flex max-w-xl flex-col gap-2 sm:flex-row">
+              <input name="q" className="input h-12 min-w-0" placeholder="What should I verify before applying for this scholarship?" />
+              <button className="btn-primary h-12 shrink-0 px-5">Analyze <ArrowRight size={16} /></button>
             </form>
             <div className="mt-4 flex flex-wrap justify-center gap-2">{["Scholarship", "Admission", "Government scheme", "Loan"].map((c) => <Link key={c} href={`/analyze?topic=${c}`} className="badge hover:border-white/40 hover:text-fg">{c}</Link>)}</div>
           </Reveal>

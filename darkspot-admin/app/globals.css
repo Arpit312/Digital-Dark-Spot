@@ -1,0 +1,17 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+:root { color-scheme: dark; }
+html { background: #000; }
+body { @apply bg-bg text-fg font-sans antialiased; }
+::selection { background: #fff; color: #000; }
+@layer components {
+  .card { @apply rounded-2xl border border-line bg-card; }
+  .btn { @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition active:scale-[.98] disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40; }
+  .btn-primary { @apply btn bg-fg text-bg hover:bg-white/90; }
+  .btn-ghost { @apply btn border border-line-strong text-fg hover:bg-white/5; }
+  .input { @apply h-10 w-full rounded-lg border border-line-strong bg-surface px-3 text-sm placeholder:text-subtle focus:border-white/50 focus:outline-none; }
+  .badge { @apply inline-flex items-center gap-1.5 rounded-full border border-line-strong px-2.5 py-0.5 text-[11px] font-medium text-muted; }
+}
+.dot-grid { background-image: radial-gradient(rgba(255,255,255,.09) 1px, transparent 1px); background-size: 24px 24px; -webkit-mask-image: radial-gradient(ellipse at center, #000 35%, transparent 75%); mask-image: radial-gradient(ellipse at center, #000 35%, transparent 75%); }
+@media (prefers-reduced-motion: reduce) { * { animation-duration: .01ms !important; transition-duration: .01ms !important; } }

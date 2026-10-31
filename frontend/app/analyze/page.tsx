@@ -126,18 +126,14 @@ const stepToAgentIndex: Record<string, number> = {
   completed: 7
 };
 
+type UploadedSource = Awaited<ReturnType<typeof uploadPdf>>;
+
 const tabs = [
   [Link2, "URL"],
   [FileUp, "PDF"],
   [Globe, "Search"],
   [ClipboardPaste, "Paste"]
 ] as const;
-
-const pack = [
-  "https://scholarships.gov.in",
-  "https://education.gov.in",
-  "NSP Central Sector Guidelines PDF"
-];
 
 function AnalyzeContent() {
   const r = useRouter();
@@ -149,10 +145,13 @@ function AnalyzeContent() {
   const [tab, setTab] = useState<"URL" | "PDF" | "Search" | "Paste">("URL");
   const [val, setVal] = useState("");
   const [src, setSrc] = useState<string[]>([]);
+  const [rawDocuments, setRawDocuments] = useState<UploadedSource[]>([]);
   const [step, setStep] = useState(-1);
   const [liveStatus, setLiveStatus] = useState<string>("");
+  const [analysisError, setAnalysisError] = useState("");
+  const [sourceError, setSourceError] = useState("");
   const [searching, setSearching] = useState(false);
-  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [searchResults, setSearchResults] = useState<Array<{ title?: string; url: string }>>([]);
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -178,13 +177,13 @@ function AnalyzeContent() {
       return;
     }
     setUploading(true);
+    setSourceError("");
     try {
       const res = await uploadPdf(file);
-      const name = res.filename || file.name;
-      setSrc((prev) => [...prev, `PDF: ${name}`]);
+      setRawDocuments((prev) => [...prev, res]);
+      setSrc((prev) => [...prev, `PDF: ${res.title || file.name}`]);
     } catch (err: any) {
-      console.warn("PDF upload fallback to local reference:", err);
-      setSrc((prev) => [...prev, `PDF: ${file.name}`]);
+      setSourceError(err.message || "Could not extract text from this PDF.");
     } finally {
       setUploading(false);
     }
@@ -193,23 +192,25 @@ function AnalyzeContent() {
   const handleSearch = async () => {
     if (!val.trim()) return;
     setSearching(true);
+    setSourceError("");
     try {
       const results = await searchSources(val.trim());
       setSearchResults(results);
-    } catch (err) {
-      console.error(err);
+    } catch (err: any) {
+      setSourceError(err.message || "Could not search live sources.");
     } finally {
       setSearching(false);
     }
   };
 
   const run = async () => {
+    setAnalysisError("");
     setStep(0);
     setLiveStatus("Initializing multi-agent pipeline orchestrator...");
 
     try {
       const result = await streamAnalyze(
-        { question: q, topic, depth, sources: src },
+        { question: q, sources: src, raw_documents: rawDocuments },
         (e) => {
           if (e.detail) {
             setLiveStatus(e.detail);
@@ -219,26 +220,17 @@ function AnalyzeContent() {
           }
           if (e.status === "complete" && e.id) {
             setStep(AGENT_PIPELINE.length);
-            r.push(`/report/${e.id}`);
           }
         }
       );
 
-      if (result && result.id) {
-        setStep(AGENT_PIPELINE.length);
-        r.push(`/report/${result.id}`);
-        return;
-      }
+      setStep(AGENT_PIPELINE.length);
+      r.push(`/report/${result.id}`);
     } catch (err) {
-      console.warn("Backend streaming failed, progressing pipeline locally:", err);
+      setStep(-1);
+      setLiveStatus("Analysis could not be completed.");
+      setAnalysisError(err instanceof Error ? err.message : "Analysis failed. Please try again.");
     }
-
-    // Step-by-step local progression if network interrupted
-    for (let i = 1; i <= AGENT_PIPELINE.length; i++) {
-      await new Promise((x) => setTimeout(x, 480));
-      setStep(i);
-    }
-    r.push("/report/demo");
   };
 
   const running = step >= 0;
@@ -269,7 +261,7 @@ function AnalyzeContent() {
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-5">
             <div>
               <div className="mb-2 text-xs font-medium text-muted">Domain Template</div>
               <Seg
@@ -277,6 +269,8 @@ function AnalyzeContent() {
                 value={topic}
                 onChange={setTopic}
                 options={["Auto", "Scholarship", "Admission", "Scheme"]}
+                className="flex w-full justify-between"
+                optionClassName="flex-1 whitespace-nowrap px-2 text-xs"
               />
             </div>
             <div>
@@ -286,6 +280,8 @@ function AnalyzeContent() {
                 value={depth}
                 onChange={setDepth}
                 options={["Quick", "Standard", "Deep"]}
+                className="flex w-full justify-between"
+                optionClassName="flex-1 whitespace-nowrap px-2 text-xs"
               />
             </div>
           </div>
@@ -293,13 +289,6 @@ function AnalyzeContent() {
           <div className="border-t border-line pt-5">
             <div className="mb-3 flex items-center justify-between">
               <span className="text-sm font-medium text-fg">Ingestion Sources</span>
-              <button
-                type="button"
-                onClick={() => setSrc(pack)}
-                className="text-xs text-muted transition hover:text-fg hover:underline"
-              >
-                Load sample NSP pack
-              </button>
             </div>
 
             <div className="mb-3 flex gap-1.5">
@@ -426,7 +415,16 @@ function AnalyzeContent() {
                   <span className="flex-1 truncate text-zinc-300 font-mono text-[11px]">{s}</span>
                   <button
                     type="button"
-                    onClick={() => setSrc(src.filter((_, j) => j !== i))}
+                    onClick={() => {
+                      const source = src[i];
+                      setSrc(src.filter((_, j) => j !== i));
+                      if (source.startsWith("PDF: ")) {
+                        const title = source.slice(5);
+                        setRawDocuments((documents) =>
+                          documents.filter((document) => document.title !== title)
+                        );
+                      }
+                    }}
                     aria-label="Remove"
                   >
                     <X size={13} className="text-muted hover:text-fg" />
@@ -434,10 +432,14 @@ function AnalyzeContent() {
                 </motion.li>
               ))}
             </ul>
+            {sourceError && (
+              <p className="mt-2 text-xs text-red-400" role="alert">{sourceError}</p>
+            )}
           </div>
 
           <button
-            disabled={running || (!q.trim() && src.length === 0)}
+            type="button"
+            disabled={running || !q.trim()}
             onClick={run}
             className="btn-primary w-full py-3.5 text-sm font-medium shadow-lg disabled:opacity-40"
           >
@@ -451,6 +453,9 @@ function AnalyzeContent() {
               </span>
             )}
           </button>
+          {analysisError && (
+            <p className="text-sm text-red-400" role="alert">{analysisError}</p>
+          )}
         </div>
 
         {/* Right Column: Multi-Agent Operations Console (7 columns) */}
@@ -463,7 +468,7 @@ function AnalyzeContent() {
                   Multi-Agent Pipeline Architecture
                 </span>
               </div>
-              <span className="badge font-mono text-[11px]">8 Agents · Zero Hallucination Gate</span>
+              <span className="badge font-mono text-[11px]">8 Agents · Evidence Review</span>
             </div>
 
             {/* Live SSE progress banner */}
@@ -562,7 +567,7 @@ function AnalyzeContent() {
           </div>
 
           <div className="mt-6 border-t border-line pt-4 flex items-center justify-between text-xs text-subtle">
-            <span>Guaranteed zero hallucination via Evidence Auditor quote gating.</span>
+            <span>Findings are checked against source quotes before they are returned.</span>
             <span className="font-mono">sim(a, b) ≥ 0.90</span>
           </div>
         </div>
