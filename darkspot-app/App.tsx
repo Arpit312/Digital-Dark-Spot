@@ -31,14 +31,39 @@ function Tabs() {
 }
 function Root() {
   const { user, ready, seen } = useAuth();
-  if (!ready) return <View style={{ flex: 1, backgroundColor: c.bg, justifyContent: "center" }}><ActivityIndicator color={c.fg} /></View>;
-  return <Stack.Navigator screenOptions={{ headerShown: false, animation: "slide_from_right", contentStyle: { backgroundColor: c.bg } }}>
-    {user ? <>
-      <Stack.Screen name="Tabs" component={Tabs} /><Stack.Screen name="Progress" component={Progress} /><Stack.Screen name="Report" component={Report} />
-      <Stack.Screen name="Accuracy" component={Accuracy} /><Stack.Screen name="HowItWorks" component={HowItWorks} /><Stack.Screen name="Campus" component={Campus} />
-      <Stack.Screen name="Settings" component={Settings} /><Stack.Screen name="Officer" component={Officer} /><Stack.Screen name="Admin" component={Admin} /></> :
-      <>{!seen && <Stack.Screen name="Onboarding" component={Onboarding} />}<Stack.Screen name="Login" component={Login} /><Stack.Screen name="Signup" component={Signup} /></>}
-  </Stack.Navigator>;
+  if (!ready) {
+    return (
+      <View style={{ flex: 1, backgroundColor: c.bg, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator size="large" color={c.fg} />
+      </View>
+    );
+  }
+  return (
+    <Stack.Navigator
+      initialRouteName={user ? "Tabs" : seen ? "Login" : "Onboarding"}
+      screenOptions={{ headerShown: false, animation: "slide_from_right", contentStyle: { backgroundColor: c.bg } }}
+    >
+      {user ? (
+        <>
+          <Stack.Screen name="Tabs" component={Tabs} />
+          <Stack.Screen name="Progress" component={Progress} />
+          <Stack.Screen name="Report" component={Report} />
+          <Stack.Screen name="Accuracy" component={Accuracy} />
+          <Stack.Screen name="HowItWorks" component={HowItWorks} />
+          <Stack.Screen name="Campus" component={Campus} />
+          <Stack.Screen name="Settings" component={Settings} />
+          <Stack.Screen name="Officer" component={Officer} />
+          <Stack.Screen name="Admin" component={Admin} />
+        </>
+      ) : (
+        <>
+          <Stack.Screen name="Onboarding" component={Onboarding} />
+          <Stack.Screen name="Login" component={Login} />
+          <Stack.Screen name="Signup" component={Signup} />
+        </>
+      )}
+    </Stack.Navigator>
+  );
 }
 export default function App() {
   return <SafeAreaProvider><AuthProvider><NavigationContainer theme={theme}><StatusBar style="light" /><Root /></NavigationContainer></AuthProvider></SafeAreaProvider>;
