@@ -8,10 +8,36 @@ import Reveal from "@/components/Reveal";
 import Marquee from "@/components/Marquee";
 import SpotlightCard from "@/components/SpotlightCard";
 import CountUp from "@/components/CountUp";
-const steps = [["Add sources", "Paste URLs, upload PDFs or search permitted sources."], ["Extract claims", "Every source is split into claims with exact quotes."], ["Compare", "Numbers and dates are checked by code, wording by an NLI model."], ["Challenge", "A second agent tries to disprove each finding."], ["Verify next", "You get a prioritized checklist with official links."]];
-const agents = ["Source Scout", "Extraction", "Conflict Detector", "Gap Finder", "Freshness", "Challenger", "Evidence Auditor", "Planner"];
-const faq = [["Is this a chatbot?", "No. It audits sources for gaps, conflicts and outdated details, with evidence for every finding."], ["Can it be wrong?", "Yes. Findings are labelled as potential gaps. Always confirm on the official source."], ["What if nothing is found?", "It says not found in the sources reviewed instead of guessing."]];
-const problems = [[CircleDashed, "Missing", "The renewal rule is nowhere in the pages you read."], [ArrowLeftRight, "Conflicting", "Two sources list different documents."], [Clock, "Outdated", "A page still shows last year's deadline."]] as const;
+const agents = [
+  { name: "Source Scout", model: "Tavily + PyMuPDF", role: "Portal Crawler & PDF Ingestion" },
+  { name: "Claim Extractor", model: "Gemini 2.5 Flash", role: "Atomic Statement Quote Extractor" },
+  { name: "Conflict Detector", model: "Deterministic Math", role: "Contradiction & Clashes Radar" },
+  { name: "Gap Finder", model: "DSI Algorithmic Matrix", role: "Dark Spot Index & Missing Info Engine" },
+  { name: "Freshness Radar", model: "Decay Math Engine", role: "Temporal Staleness & Expired Cycles" },
+  { name: "Challenger Agent", model: "Bayesian Red-Team", role: "Adversarial Counter-Argument Disprover" },
+  { name: "Evidence Auditor", model: "Zero-Hallucination Gate", role: "Verbatim Substring Gatekeeper (≥90%)" },
+  { name: "Verify-Next Planner", model: "MMR Diversity", role: "Actionable Verification Strategy" }
+];
+const steps = [
+  ["Add sources", "Paste URLs, upload PDFs or search permitted sources."],
+  ["Extract claims", "Every source is split into claims with exact quotes."],
+  ["Compare", "Numbers and dates are checked by code, wording by an NLI model."],
+  ["Challenge", "A second agent tries to disprove each finding."],
+  ["Verify next", "You get a prioritized checklist with official links."]
+];
+
+const faq = [
+  ["Is this a chatbot?", "No. It audits sources for gaps, conflicts and outdated details, with evidence for every finding."],
+  ["Can it be wrong?", "Yes. Findings are labelled as potential gaps. Always confirm on the official source."],
+  ["What if nothing is found?", "It says not found in the sources reviewed instead of guessing."]
+];
+
+const problems = [
+  [CircleDashed, "Missing", "The renewal rule is nowhere in the pages you read."],
+  [ArrowLeftRight, "Conflicting", "Two sources list different documents."],
+  [Clock, "Outdated", "A page still shows last year's deadline."]
+] as const;
+
 export default function Home() {
   const sticky = useRef<HTMLDivElement>(null), track = useRef<HTMLDivElement>(null);
   const [active, setActive] = useState(0);
@@ -66,8 +92,20 @@ export default function Home() {
         </div>
       </section>
       <section ref={track} className="overflow-hidden py-24">
-        <div className="mx-auto mb-10 max-w-6xl px-5"><Reveal><h2 className="text-3xl font-semibold tracking-tight md:text-5xl">Eight agents. One audited answer.</h2></Reveal></div>
-        <motion.div style={{ x }} className="flex w-max gap-4 px-5">{agents.map((a, i) => <SpotlightCard key={a} className="w-64"><div className="font-mono text-xs text-subtle">AGENT {String(i + 1).padStart(2, "0")}</div><div className="mt-10 text-xl font-medium">{a}</div></SpotlightCard>)}</motion.div>
+        <motion.div style={{ x }} className="flex w-max gap-4 px-5">
+          {agents.map((a, i) => (
+            <SpotlightCard key={a.name} className="w-72 p-6 flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between">
+                  <span className="font-mono text-xs text-subtle font-medium">AGENT 0{i + 1}</span>
+                  <span className="rounded bg-white/5 px-2 py-0.5 text-[10px] font-mono text-zinc-400 border border-white/5">{a.model}</span>
+                </div>
+                <div className="mt-6 text-xl font-semibold tracking-tight text-fg">{a.name}</div>
+                <p className="mt-2 text-xs text-muted leading-relaxed">{a.role}</p>
+              </div>
+            </SpotlightCard>
+          ))}
+        </motion.div>
       </section>
       <section className="mx-auto grid max-w-6xl gap-4 px-5 py-20 md:grid-cols-3">
         {[[8, "", "AI agents in the pipeline"], [4, "", "finding types, each with a label"], [100, "%", "of findings carry an evidence quote (by design)"]].map(([n, s, l]) => <Reveal key={String(l)}><div className="card p-8"><div className="text-5xl font-semibold tracking-tight"><CountUp to={n as number} suffix={s as string} /></div><p className="mt-3 text-sm text-muted">{l}</p></div></Reveal>)}

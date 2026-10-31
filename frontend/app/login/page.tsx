@@ -3,8 +3,9 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { Eye, EyeOff, Loader2, ShieldCheck } from "lucide-react";
 import Logo from "@/components/Logo";
+import AuthBackground from "@/components/AuthBackground";
 import { authLogin } from "@/lib/api";
 
 export default function Login() {
@@ -33,12 +34,14 @@ export default function Login() {
   };
 
   return (
-    <div className="relative flex min-h-[calc(100vh-4rem)] items-center justify-center px-5">
-      <div className="dot-grid absolute inset-0" />
-      <div className="card relative w-full max-w-sm p-8">
+    <div className="relative flex min-h-[calc(100vh-4rem)] items-center justify-center px-5 py-12 overflow-hidden">
+      {/* Dynamic Cybernetic / Cosmic Auth Background */}
+      <AuthBackground />
+
+      <div className="card relative w-full max-w-sm p-8 bg-card/85 backdrop-blur-2xl border-white/10 shadow-[0_0_70px_-15px_rgba(255,255,255,0.08)]">
         <Logo />
         <h1 className="mt-8 text-2xl font-semibold tracking-tight">Welcome back</h1>
-        <p className="mt-1 text-sm text-muted">Sign in to see your saved reports.</p>
+        <p className="mt-1 text-sm text-muted">Sign in to access your saved audit reports.</p>
         
         {error && (
           <div className="mt-4 rounded-lg border border-red-500/30 bg-red-500/10 p-3 text-xs text-red-400">
@@ -50,7 +53,7 @@ export default function Login() {
           <input
             className="input"
             type="email"
-            placeholder="Email"
+            placeholder="Email address"
             autoComplete="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
@@ -69,7 +72,7 @@ export default function Login() {
             <button
               type="button"
               onClick={() => setShow(!show)}
-              className="absolute right-3 top-3.5 text-muted"
+              className="absolute right-3 top-3.5 text-muted transition hover:text-fg"
               aria-label="Toggle password"
             >
               {show ? <EyeOff size={16} /> : <Eye size={16} />}
@@ -78,11 +81,11 @@ export default function Login() {
           <button
             type="submit"
             disabled={loading}
-            className="btn-primary w-full py-3 disabled:opacity-50"
+            className="btn-primary w-full py-3 shadow-md disabled:opacity-50"
           >
             {loading ? (
               <span className="flex items-center justify-center gap-2">
-                <Loader2 size={16} className="animate-spin" /> Signing in...
+                <Loader2 size={16} className="animate-spin text-bg" /> Authenticating...
               </span>
             ) : (
               "Sign in"
@@ -95,18 +98,24 @@ export default function Login() {
           </div>
           <button
             type="button"
-            onClick={() => alert("Google OAuth requires domain configuration in Supabase Dashboard.")}
-            className="btn-ghost w-full py-3"
+            onClick={() => alert("Google OAuth requires domain redirect configuration in Supabase Dashboard.")}
+            className="btn-ghost w-full py-3 text-xs"
           >
             Continue with Google
           </button>
         </form>
+
         <p className="mt-6 text-center text-sm text-muted">
           New here?{" "}
           <Link href="/signup" className="text-fg underline-offset-4 hover:underline">
             Create an account
           </Link>
         </p>
+
+        <div className="mt-6 flex items-center justify-center gap-1.5 text-[11px] text-subtle border-t border-line pt-4">
+          <ShieldCheck size={13} className="text-emerald-400" />
+          <span>Secured via Supabase Cryptographic Auth</span>
+        </div>
       </div>
     </div>
   );

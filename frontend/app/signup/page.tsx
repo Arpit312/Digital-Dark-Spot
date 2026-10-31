@@ -3,8 +3,9 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Loader2 } from "lucide-react";
+import { Loader2, ShieldCheck } from "lucide-react";
 import Logo from "@/components/Logo";
+import AuthBackground from "@/components/AuthBackground";
 import { authSignup } from "@/lib/api";
 
 export default function Signup() {
@@ -48,11 +49,14 @@ export default function Signup() {
   };
 
   return (
-    <div className="relative flex min-h-[calc(100vh-4rem)] items-center justify-center px-5">
-      <div className="dot-grid absolute inset-0" />
-      <div className="card relative w-full max-w-sm p-8">
+    <div className="relative flex min-h-[calc(100vh-4rem)] items-center justify-center px-5 py-12 overflow-hidden">
+      {/* Dynamic Cybernetic / Cosmic Auth Background */}
+      <AuthBackground />
+
+      <div className="card relative w-full max-w-sm p-8 bg-card/85 backdrop-blur-2xl border-white/10 shadow-[0_0_70px_-15px_rgba(255,255,255,0.08)]">
         <Logo />
         <h1 className="mt-8 text-2xl font-semibold tracking-tight">Create your account</h1>
+        <p className="mt-1 text-sm text-muted">Join DarkSpot Atlas to track verified audits.</p>
         
         {error && (
           <div className="mt-4 rounded-lg border border-red-500/30 bg-red-500/10 p-3 text-xs text-red-400">
@@ -76,7 +80,7 @@ export default function Signup() {
           <input
             className="input"
             type="email"
-            placeholder="Email"
+            placeholder="Email address"
             autoComplete="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
@@ -85,13 +89,13 @@ export default function Signup() {
           <input
             className="input"
             type="password"
-            placeholder="Password"
+            placeholder="Choose password"
             value={pw}
             onChange={(e) => setPw(e.target.value)}
             autoComplete="new-password"
             required
           />
-          <div className="flex gap-1">
+          <div className="flex gap-1 py-1">
             {[0, 1, 2, 3].map((i) => (
               <span
                 key={i}
@@ -104,11 +108,11 @@ export default function Signup() {
           <button
             type="submit"
             disabled={loading}
-            className="btn-primary w-full py-3 disabled:opacity-50"
+            className="btn-primary w-full py-3 shadow-md disabled:opacity-50"
           >
             {loading ? (
               <span className="flex items-center justify-center gap-2">
-                <Loader2 size={16} className="animate-spin" /> Creating account...
+                <Loader2 size={16} className="animate-spin text-bg" /> Creating account...
               </span>
             ) : (
               "Create account"
@@ -116,21 +120,24 @@ export default function Signup() {
           </button>
           <button
             type="button"
-            onClick={() => alert("Google OAuth requires domain configuration in Supabase Dashboard.")}
-            className="btn-ghost w-full py-3"
+            onClick={() => alert("Google OAuth requires domain redirect configuration in Supabase Dashboard.")}
+            className="btn-ghost w-full py-3 text-xs"
           >
             Continue with Google
           </button>
         </form>
+
         <p className="mt-6 text-center text-sm text-muted">
           Have an account?{" "}
           <Link href="/login" className="text-fg underline-offset-4 hover:underline">
             Sign in
           </Link>
         </p>
-        <p className="mt-3 text-center text-xs text-subtle">
-          Officer access requires verification by an admin.
-        </p>
+
+        <div className="mt-6 flex items-center justify-center gap-1.5 text-[11px] text-subtle border-t border-line pt-4">
+          <ShieldCheck size={13} className="text-emerald-400" />
+          <span>Encrypted with Supabase JWT Authentication</span>
+        </div>
       </div>
     </div>
   );
