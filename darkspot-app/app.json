@@ -26,16 +26,17 @@
         "ACCESS_NETWORK_STATE"
       ]
     },
-    "extra": {
-      "eas": {
-        "projectId": "darkspot-atlas"
-      }
-    },
     "runtimeVersion": {
       "policy": "appVersion"
     },
     "plugins": [
       "expo-secure-store"
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "47144eab-a9d1-44d4-8a41-c1b14981dac8"
+      }
+    },
+    "owner": "arpit312"
   }
 }
