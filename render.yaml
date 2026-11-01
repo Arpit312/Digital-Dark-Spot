@@ -62,7 +62,7 @@ services:
     plan: free
     rootDir: frontend
     buildCommand: npm install && npm run build
-    startCommand: npm run start
+    startCommand: npx next start -p $PORT
     envVars:
       - key: NODE_VERSION
         value: "20"
@@ -73,8 +73,6 @@ services:
           name: darkspot-backend
           type: web
           property: host       # Auto-resolves to backend URL
-      - key: PORT
-        value: "3000"
     autoDeploy: true
 
   # ============================================================================
@@ -87,7 +85,7 @@ services:
     plan: free
     rootDir: darkspot-admin
     buildCommand: npm install && npm run build
-    startCommand: npm run start
+    startCommand: npx next start -p $PORT
     envVars:
       - key: NODE_VERSION
         value: "20"
@@ -98,6 +96,4 @@ services:
           name: darkspot-backend
           type: web
           property: host       # Auto-resolves to backend URL
-      - key: PORT
-        value: "3001"
     autoDeploy: true

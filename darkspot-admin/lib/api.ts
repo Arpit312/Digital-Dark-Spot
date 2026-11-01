@@ -1,6 +1,7 @@
 "use client";
 import { useCallback, useEffect, useState } from "react";
-export const BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const rawBase = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+export const BASE = rawBase.startsWith("http") ? rawBase : `https://${rawBase}`;
 export const WEBSITE_URL = process.env.NEXT_PUBLIC_WEBSITE_URL || "http://localhost:3000";
 export const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:8081";
 export const tok = { get: () => (typeof window === "undefined" ? null : localStorage.getItem("admin_token")), set: (t: string | null) => (t ? localStorage.setItem("admin_token", t) : localStorage.removeItem("admin_token")) };
