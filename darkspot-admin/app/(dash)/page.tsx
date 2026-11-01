@@ -38,7 +38,7 @@ export default function Overview() {
         right={
           <div className="flex items-center gap-2">
             <span className="badge flex items-center gap-1.5 font-mono">
-              <span className="h-2 w-2 animate-pulse rounded-full bg-emerald-400" />
+              <span className="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.6)]" />
               Ecosystem Active
             </span>
           </div>
@@ -128,18 +128,15 @@ export default function Overview() {
       <Data r={stats} empty="No stats yet">
         {(d: any[]) => (
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-            {d.map((s, i) => (
-              <motion.div
+            {d.map((s) => (
+              <div
                 key={s.label}
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.05 }}
-                className="card p-5"
+                className="card p-5 transition-all"
               >
                 <div className="text-xs text-muted">{s.label}</div>
                 <div className="mt-2 text-2xl font-bold tracking-tight text-white">{s.value}</div>
                 {s.delta && <div className="mt-1 text-xs text-subtle font-mono">{s.delta}</div>}
-              </motion.div>
+              </div>
             ))}
           </div>
         )}

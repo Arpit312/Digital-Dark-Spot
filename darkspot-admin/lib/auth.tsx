@@ -10,14 +10,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const token = tok.get();
       if (token) {
         try {
+          const cached = typeof window !== "undefined" ? localStorage.getItem("admin_user") : null;
+          if (cached) {
+            try { setUser(JSON.parse(cached)); } catch {}
+          }
           const u = await api("/me");
           if (u.role === "admin") {
-            setUser({ ...u, role: "admin", name: u.user_metadata?.full_name || u.name || "Admin Officer" });
+            const adminUser = { ...u, role: "admin", name: u.user_metadata?.full_name || u.name || "Admin Officer" };
+            setUser(adminUser);
+            localStorage.setItem("admin_user", JSON.stringify(adminUser));
           } else {
             tok.set(null);
+            localStorage.removeItem("admin_user");
+            setUser(null);
           }
         } catch {
           tok.set(null);
+          localStorage.removeItem("admin_user");
+          setUser(null);
         }
       }
       setReady(true);
@@ -32,12 +42,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const u = await api("/me");
     if (u.role !== "admin") {
       tok.set(null);
+      localStorage.removeItem("admin_user");
       throw new Error("This account does not have admin access.");
     }
     const adminUser = { ...u, role: "admin", name: u.user_metadata?.full_name || u.name || "Admin Officer" };
     setUser(adminUser);
+    localStorage.setItem("admin_user", JSON.stringify(adminUser));
     return adminUser;
   };
-  const logout = () => { tok.set(null); setUser(null); };
+  const logout = () => { tok.set(null); localStorage.removeItem("admin_user"); setUser(null); };
   return <C.Provider value={{ user, ready, login, logout }}>{children}</C.Provider>;
 }

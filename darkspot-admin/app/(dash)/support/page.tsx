@@ -321,7 +321,8 @@ export default function SupportDesk() {
       {/* Main Ticket Queue Table */}
       <div className="card overflow-hidden">
         {ticketsQuery.loading && !ticketsQuery.data ? (
-          <div className="p-8 text-center text-xs text-muted font-mono animate-pulse">
+          <div className="p-8 text-center text-xs text-muted font-mono flex items-center justify-center gap-2">
+            <span className="inline-block h-3 w-3 rounded-full border-2 border-line-strong border-t-accent animate-spin" />
             Connecting to support triage queue...
           </div>
         ) : rawTickets.length === 0 ? (
@@ -404,7 +405,7 @@ export default function SupportDesk() {
                             : "bg-amber-500/15 text-amber-400 border border-amber-500/30"
                         }`}
                       >
-                        <span className={`h-1.5 w-1.5 rounded-full ${isResolved ? "bg-emerald-400" : "bg-amber-400 animate-pulse"}`} />
+                        <span className={`h-1.5 w-1.5 rounded-full ${isResolved ? "bg-emerald-400" : "bg-amber-400"}`} />
                         {x.status}
                       </span>
                       <div className="text-[10px] font-mono text-subtle">{x.sla || "Within 15 mins"}</div>

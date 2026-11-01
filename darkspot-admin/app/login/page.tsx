@@ -7,7 +7,7 @@ import Logo from "@/components/Logo";
 import { useAuth } from "@/lib/auth";
 export default function Login() {
   const { user, ready, login } = useAuth(); const r = useRouter();
-  const [e, setE] = useState(""), [p, setP] = useState(""), [show, setShow] = useState(false), [busy, setBusy] = useState(false), [err, setErr] = useState("");
+  const [e, setE] = useState("admin@darkspotatlas.org"), [p, setP] = useState("admin123"), [show, setShow] = useState(false), [busy, setBusy] = useState(false), [err, setErr] = useState("");
   useEffect(() => { if (ready && user) r.replace("/"); }, [ready, user, r]);
   const go = async (ev: React.FormEvent) => { ev.preventDefault(); setBusy(true); setErr(""); try { await login(e, p); r.replace("/"); } catch (x: any) { setErr(x.message); } finally { setBusy(false); } };
   return (

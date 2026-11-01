@@ -5,7 +5,7 @@ import { AlertCircle, Inbox, Sparkles, Loader2 } from "lucide-react";
 import { api } from "@/lib/api";
 export function Empty({ icon: I = Inbox, title, sub, action }: any) { return <div className="flex flex-col items-center px-6 py-14 text-center"><I size={26} strokeWidth={1.5} className="text-subtle" /><div className="mt-4 text-sm font-medium">{title}</div>{sub && <div className="mt-1 max-w-sm text-sm text-muted">{sub}</div>}{action && <div className="mt-5">{action}</div>}</div>; }
 export function Data({ r, children, empty = "Nothing here yet", isEmpty }: any) {
-  if (r.loading && !r.data) return <div className="space-y-2">{[0, 1, 2].map((i) => <div key={i} className="h-14 animate-pulse rounded-xl bg-white/5" />)}</div>;
+  if (r.loading && !r.data) return <div className="space-y-2">{[0, 1, 2].map((i) => <div key={i} className="h-14 rounded-xl bg-white/[0.03] border border-white/5" />)}</div>;
   if (r.error) return <Empty icon={AlertCircle} title={r.error.status === 403 ? "No access" : "Could not load"} sub={r.error.message} action={<button className="btn-ghost" onClick={r.reload}>Retry</button>} />;
   const d = r.data; if (d == null || (Array.isArray(d) && !d.length) || (isEmpty && isEmpty(d))) return <Empty title={empty} />;
   return <>{children(d)}</>;

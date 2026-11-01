@@ -61,7 +61,7 @@ export default function DashLayout({ children }: { children: React.ReactNode }) 
             >
               <LifeBuoy size={13} />
               <span className="hidden md:inline">Support Queue</span>
-              <span className="h-1.5 w-1.5 rounded-full bg-amber-400 animate-pulse" />
+              <span className="h-1.5 w-1.5 rounded-full bg-amber-400" />
             </Link>
 
             <button onClick={() => setAi(true)} className="btn-ghost !py-1.5 text-xs flex items-center gap-1.5">
