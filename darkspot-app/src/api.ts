@@ -91,6 +91,20 @@ export async function api<T = any>(
     });
     if (timeoutId) clearTimeout(timeoutId);
     if (!r.ok) {
+      if (r.status === 401 && token) {
+        // Clear expired or invalidated token to prevent sticky auth lockouts
+        await setToken(null);
+        if (method === "GET") {
+          const retryHeaders = { ...headers };
+          delete retryHeaders.Authorization;
+          try {
+            const retryRes = await fetch(url, { method, headers: retryHeaders, signal: controller?.signal });
+            if (retryRes.ok) {
+              return (retryRes.status === 204 ? null : await retryRes.json()) as T;
+            }
+          } catch {}
+        }
+      }
       let m: any = "Request failed (" + r.status + ")";
       try {
         const j = await r.json();

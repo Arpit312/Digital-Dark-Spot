@@ -10,25 +10,34 @@ class LLMClient:
     def __init__(self):
         self.gemini_key = settings.GEMINI_API_KEY
         self.groq_key = settings.GROQ_API_KEY
+        self._gemini_disabled_until = 0
 
     async def generate_json(self, prompt: str, schema_desc: str = "", temperature: float = 0.1) -> Optional[Dict[str, Any]]:
         """
         Generate structured JSON from LLM.
-        Primary: Gemini (gemini-2.5-flash). Fallback: Groq (openai/gpt-oss-120b).
+        Primary: Gemini. Automatic fallback to high-speed Groq if quota exceeded.
         """
-        # Try Gemini first
-        if self.gemini_key:
-            for model_name in ["gemini-2.5-flash", "gemini-flash-latest", "gemini-2.5-flash-lite"]:
+        import time
+        now = time.time()
+
+        # Try Gemini if not recently rate-limited
+        if self.gemini_key and now > self._gemini_disabled_until:
+            for model_name in ["gemini-2.5-flash", "gemini-2.5-flash-lite"]:
                 try:
                     res = await self._call_gemini_json(prompt, schema_desc, temperature, model_name)
                     if res is not None:
                         return res
                 except Exception as e:
+                    err_str = str(e)
+                    if "429" in err_str or "Quota exceeded" in err_str:
+                        logger.warning("Gemini free quota exceeded. Switching to high-speed Groq fallback for 30 minutes.")
+                        self._gemini_disabled_until = now + 1800
+                        break
                     logger.warning(f"Gemini {model_name} call failed: {e}. Trying next...")
 
-        # Fallback to Groq
+        # High-speed Groq fallback
         if self.groq_key:
-            for model_name in ["openai/gpt-oss-120b", "openai/gpt-oss-20b", "qwen/qwen3.8-27b"]:
+            for model_name in ["qwen/qwen3.8-27b", "openai/gpt-oss-20b", "openai/gpt-oss-120b"]:
                 try:
                     res = await self._call_groq_json(prompt, schema_desc, temperature, model_name)
                     if res is not None:
@@ -67,7 +76,7 @@ class LLMClient:
 
     async def _call_groq_json(self, prompt: str, schema_desc: str, temperature: float, model_name: str) -> Optional[Dict[str, Any]]:
         from groq import Groq
-        client = Groq(api_key=self.groq_key)
+        client = Groq(api_key=self.groq_key, max_retries=0)
         
         full_prompt = f"{prompt}\n\nYou MUST return strictly valid JSON. Format schema: {schema_desc}" if schema_desc else prompt
         

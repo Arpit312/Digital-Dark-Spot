@@ -15,13 +15,20 @@ class SourceScoutAgent:
     async def ingest_url(self, url: str) -> Dict[str, Any]:
         """Fetches and cleans live webpage content using trafilatura"""
         try:
-            async with httpx.AsyncClient(timeout=10.0, follow_redirects=True) as client:
+            async with httpx.AsyncClient(timeout=12.0, follow_redirects=True, verify=False) as client:
                 resp = await client.get(url, headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"})
                 html = resp.text
                 
-            import trafilatura
-            extracted_text = trafilatura.extract(html, include_links=False, include_tables=True)
-            text = extracted_text if extracted_text else html[:5000]
+            try:
+                import trafilatura
+                extracted_text = trafilatura.extract(html, include_links=False, include_tables=True)
+                text = extracted_text if extracted_text else html[:5000]
+            except Exception:
+                import re
+                clean = re.sub(r'<script.*?</script>', ' ', html, flags=re.DOTALL)
+                clean = re.sub(r'<style.*?</style>', ' ', clean, flags=re.DOTALL)
+                clean = re.sub(r'<[^>]+>', ' ', clean)
+                text = re.sub(r'\s+', ' ', clean).strip()[:8000]
             
             sha = hashlib.sha256(text.encode("utf-8")).hexdigest()
             domain = urlparse(url).netloc

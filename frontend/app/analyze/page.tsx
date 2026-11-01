@@ -229,7 +229,12 @@ function AnalyzeContent() {
     } catch (err) {
       setStep(-1);
       setLiveStatus("Analysis could not be completed.");
-      setAnalysisError(err instanceof Error ? err.message : "Analysis failed. Please try again.");
+      const msg = err instanceof Error ? err.message : "Analysis failed.";
+      if (msg.includes("Failed to fetch") || msg.includes("NetworkError")) {
+        setAnalysisError("Cloud server is waking up or connecting (Render free tier spin-up takes ~25s). Please tap 'Execute' once more to connect.");
+      } else {
+        setAnalysisError(msg);
+      }
     }
   };
 

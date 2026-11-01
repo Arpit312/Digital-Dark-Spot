@@ -53,3 +53,4 @@ class Settings:
         self.HOST: str = os.getenv("HOST", "0.0.0.0")
 
 settings = Settings()
+

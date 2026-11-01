@@ -157,9 +157,17 @@ class OrchestratorAgent:
             try:
                 sb = get_supabase_client()
                 if sb:
+                    valid_uid = None
+                    if user_id and user_id != "guest-user":
+                        try:
+                            import uuid as _uuid
+                            valid_uid = str(_uuid.UUID(str(user_id)))
+                        except Exception:
+                            valid_uid = None
+
                     await sb.insert("analyses", {
                         "id": analysis_id,
-                        "user_id": user_id,
+                        "user_id": valid_uid,
                         "question": question,
                         "topic_type": topic_type,
                         "coverage": gap_res["coverage"],
