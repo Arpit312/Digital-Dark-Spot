@@ -1,4 +1,4 @@
-const rawApi = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const rawApi = process.env.NEXT_PUBLIC_API_URL || "https://darkspot-backend.onrender.com";
 export const API = rawApi.startsWith("http") ? rawApi : `https://${rawApi}`;
 
 export type Finding = {

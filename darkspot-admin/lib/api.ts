@@ -1,6 +1,6 @@
 "use client";
 import { useCallback, useEffect, useState } from "react";
-const rawBase = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const rawBase = process.env.NEXT_PUBLIC_API_URL || "https://darkspot-backend.onrender.com";
 export const BASE = rawBase.startsWith("http") ? rawBase : `https://${rawBase}`;
 export const WEBSITE_URL = process.env.NEXT_PUBLIC_WEBSITE_URL || "http://localhost:3000";
 export const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:8081";

@@ -2,7 +2,7 @@ import * as SecureStore from "expo-secure-store";
 import { useCallback, useEffect, useState, useRef } from "react";
 
 export const BASE = (
-  process.env.EXPO_PUBLIC_API_URL || "http://localhost:8000"
+  process.env.EXPO_PUBLIC_API_URL || "https://darkspot-backend.onrender.com"
 ).replace(/\/+$/, "");
 
 let token: string | null = null;
