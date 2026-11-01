@@ -154,31 +154,33 @@ class OrchestratorAgent:
         }
 
         if persist:
-            sb = get_supabase_client()
-            if not sb:
-                raise RuntimeError("Supabase database is not configured.")
-            await sb.insert("analyses", {
-                "id": analysis_id,
-                "user_id": user_id,
-                "question": question,
-                "topic_type": topic_type,
-                "coverage": gap_res["coverage"],
-                "dsi": gap_res["dsi"],
-                "status": "completed",
-                "result": analysis_payload,
-            })
-            for source in sources:
-                await sb.insert("sources", {
-                    "analysis_id": analysis_id,
-                    "url": source.get("url"),
-                    "title": source.get("title"),
-                    "domain": source.get("domain"),
-                    "tier": source.get("tier", 0.2),
-                    "text": source.get("text", ""),
-                    "sha256": source.get("sha256"),
-                    "published_at": source.get("published_at"),
-                    "trust": source.get("trust", 0.5),
-                })
+            try:
+                sb = get_supabase_client()
+                if sb:
+                    await sb.insert("analyses", {
+                        "id": analysis_id,
+                        "user_id": user_id,
+                        "question": question,
+                        "topic_type": topic_type,
+                        "coverage": gap_res["coverage"],
+                        "dsi": gap_res["dsi"],
+                        "status": "completed",
+                        "result": analysis_payload,
+                    })
+                    for source in sources:
+                        await sb.insert("sources", {
+                            "analysis_id": analysis_id,
+                            "url": source.get("url"),
+                            "title": source.get("title"),
+                            "domain": source.get("domain"),
+                            "tier": source.get("tier", 0.2),
+                            "text": source.get("text", ""),
+                            "sha256": source.get("sha256"),
+                            "published_at": source.get("published_at"),
+                            "trust": source.get("trust", 0.5),
+                        })
+            except Exception as e:
+                logger.warning(f"Could not persist analysis to Supabase: {e}")
 
         await report_progress("completed", "Analysis complete. Atlas generated.")
 

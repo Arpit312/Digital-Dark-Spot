@@ -90,6 +90,27 @@ async def get_current_user(authorization: Optional[str] = Header(None)) -> dict:
     return await resolve_current_user(authorization)
 
 
+async def get_optional_user(authorization: Optional[str] = Header(None)) -> dict:
+    if not authorization or not authorization.startswith("Bearer "):
+        return {
+            "id": "guest-user",
+            "user_id": "guest-user",
+            "email": "citizen@darkspotatlas.org",
+            "role": "citizen",
+            "profile": {"role": "citizen", "verified": False, "full_name": "Citizen"}
+        }
+    try:
+        return await resolve_current_user(authorization)
+    except Exception:
+        return {
+            "id": "guest-user",
+            "user_id": "guest-user",
+            "email": "citizen@darkspotatlas.org",
+            "role": "citizen",
+            "profile": {"role": "citizen", "verified": False, "full_name": "Citizen"}
+        }
+
+
 async def require_officer(authorization: Optional[str] = Header(None)) -> dict:
     user = await resolve_current_user(authorization)
     if user.get("role") not in {"officer", "admin"}:
@@ -116,7 +137,7 @@ async def protect_admin_routes(request: Request, call_next):
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.CORS_ORIGINS,
-    allow_origin_regex=r"https?://.*",
+    allow_origin_regex=r".*",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -744,49 +765,53 @@ async def list_analyses(current_user: dict = Depends(get_current_user)):
     return analyses if analyses else [REAL_DEMO_ANALYSIS]
 
 @app.get("/analyses/{id}")
-async def get_analysis(id: str, current_user: dict = Depends(get_current_user)):
-    """Retrieve an analysis owned by the authenticated user or demo."""
+async def get_analysis(id: str, current_user: dict = Depends(get_optional_user)):
+    """Retrieve an analysis owned by the authenticated user, guest, or in-memory store."""
     if id == "demo":
         return REAL_DEMO_ANALYSIS
+    if id in ANALYSES_STORE:
+        return ANALYSES_STORE[id]
+
     sb = get_supabase_client()
-    if not sb:
-        raise HTTPException(status_code=503, detail="Supabase database is not configured.")
-    try:
-        records = await sb.select(
-            "analyses",
-            params={
-                "id": f"eq.{id}",
-                "select": "result",
-                "limit": "1",
-            },
-        )
-    except Exception as exc:
-        logger.warning("Could not load analysis %s: %s", id, exc)
-        records = []
-    if records and records[0].get("result"):
-        return records[0]["result"]
+    if sb:
+        try:
+            records = await sb.select(
+                "analyses",
+                params={
+                    "id": f"eq.{id}",
+                    "select": "result",
+                    "limit": "1",
+                },
+            )
+            if records and records[0].get("result"):
+                ANALYSES_STORE[id] = records[0]["result"]
+                return records[0]["result"]
+        except Exception as exc:
+            logger.warning("Could not load analysis %s: %s", id, exc)
+
     raise HTTPException(status_code=404, detail="Analysis not found.")
 
 @app.post("/analyze")
 async def analyze_topic(
     req: AnalyzeRequest,
-    current_user: dict = Depends(get_current_user),
+    current_user: dict = Depends(get_optional_user),
 ):
     """
     Standard JSON endpoint: analyzes question + URLs and returns full Atlas audit.
     """
     if not req.question or not req.question.strip():
         raise HTTPException(status_code=400, detail="Question cannot be empty.")
-    if not get_supabase_client():
-        raise HTTPException(status_code=503, detail="Supabase database is not configured.")
     try:
+        sb_available = get_supabase_client() is not None
         result = await orchestrator.analyze_topic(
             question=req.question.strip(),
             urls=req.urls,
             raw_documents=req.raw_documents,
-            user_id=current_user["id"],
-            persist=True,
+            user_id=current_user.get("id", "guest-user"),
+            persist=sb_available,
         )
+        if result and "id" in result:
+            ANALYSES_STORE[result["id"]] = result
         return result
     except Exception as e:
         logger.error(f"Error in /analyze: {e}", exc_info=True)
@@ -795,15 +820,15 @@ async def analyze_topic(
 @app.post("/analyze/stream")
 async def analyze_topic_stream(
     req: AnalyzeRequest,
-    current_user: dict = Depends(get_current_user),
+    current_user: dict = Depends(get_optional_user),
 ):
     """
     Server-Sent Events (SSE) endpoint: streams live agent progress to frontend.
     """
     if not req.question or not req.question.strip():
         raise HTTPException(status_code=400, detail="Question cannot be empty.")
-    if not get_supabase_client():
-        raise HTTPException(status_code=503, detail="Supabase database is not configured.")
+
+    sb_available = get_supabase_client() is not None
 
     async def event_generator():
         progress_queue = []
@@ -819,8 +844,8 @@ async def analyze_topic_stream(
                 urls=req.urls,
                 raw_documents=req.raw_documents,
                 progress_callback=callback,
-                user_id=current_user["id"],
-                persist=True,
+                user_id=current_user.get("id", "guest-user"),
+                persist=sb_available,
             )
         )
 
@@ -830,6 +855,9 @@ async def analyze_topic_stream(
             await asyncio.sleep(0.1)
 
         result = await task
+        if result and "id" in result:
+            ANALYSES_STORE[result["id"]] = result
+
         while progress_queue:
             yield progress_queue.pop(0)
 
