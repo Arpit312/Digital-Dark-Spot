@@ -1,18 +1,171 @@
 import React from "react";
 import { View } from "react-native";
-import { Screen, Header, T, Card, Empty, Loading, ErrorBox } from "../ui";
+import { Feather } from "@expo/vector-icons";
+import { Screen, Header, T, Card, Empty, Loading, ErrorBox, FadeIn, StatCard, ProgressBar } from "../ui";
 import { useFetch } from "../api";
-import { c } from "../theme";
+import { c, r, sp } from "../theme";
+
 export default function Accuracy() {
   const { data, loading, error, reload } = useFetch<any>("/eval/report");
   const empty = data && !data.metrics?.length && !data.ablation?.length;
+
   return (
-    <Screen><Header back eyebrow="ACCURACY" title="Measured results" />
-      {loading ? <Loading /> : error ? <ErrorBox error={error} retry={reload} /> : empty ? <Empty icon="bar-chart-2" title="No evaluation yet" sub="Results appear after an evaluation run." /> : <View style={{ gap: 12 }}>
-        <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>{data.metrics?.map((m: any) => <Card key={m.label} style={{ flexGrow: 1, minWidth: "45%" }}><T s="sub">{m.label}</T><T s="h" style={{ fontSize: 26, marginTop: 4 }}>{m.value}</T></Card>)}</View>
-        {!!data.ablation?.length && <Card><T s="h" style={{ marginBottom: 14 }}>Ablation</T>{data.ablation.map((a: any) => <View key={a.label} style={{ marginBottom: 12 }}><View style={{ flexDirection: "row", justifyContent: "space-between", marginBottom: 6 }}><T s="sub">{a.label}</T><T s="sub">{a.value}</T></View><View style={{ height: 6, borderRadius: 3, backgroundColor: c.line }}><View style={{ height: 6, borderRadius: 3, backgroundColor: c.fg, width: `${Math.min(100, Number(a.value))}%` }} /></View></View>)}</Card>}
-        {!!data.by_type?.length && <Card><T s="h" style={{ marginBottom: 10 }}>By finding type</T>{data.by_type.map((r: any) => <View key={r.type} style={{ flexDirection: "row", paddingVertical: 8, borderTopWidth: 1, borderTopColor: c.line }}><T style={{ flex: 1 }}>{r.type}</T><T s="mono" style={{ width: 60 }}>{r.precision}</T><T s="mono" style={{ width: 60 }}>{r.recall}</T></View>)}</Card>}
-        {!!data.note && <T s="sub">{data.note}</T>}</View>}
+    <Screen>
+      <Header back eyebrow="ACCURACY" title="Measured results" />
+
+      {loading ? (
+        <Loading />
+      ) : error ? (
+        <ErrorBox error={error} retry={reload} />
+      ) : empty ? (
+        <Empty
+          icon="bar-chart-2"
+          title="No evaluation yet"
+          sub="Results appear after an evaluation run with gold-set benchmarks."
+        />
+      ) : (
+        <View style={{ gap: 16 }}>
+          {/* Metrics grid */}
+          <FadeIn>
+            <T s="eyebrow" style={{ marginBottom: 12 }}>
+              CORE METRICS
+            </T>
+            <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10 }}>
+              {data?.metrics?.map((m: any) => (
+                <StatCard
+                  key={m.label}
+                  label={m.label}
+                  value={m.value}
+                  icon={
+                    m.label.toLowerCase().includes("precision")
+                      ? "target"
+                      : m.label.toLowerCase().includes("recall")
+                      ? "layers"
+                      : m.label.toLowerCase().includes("f1")
+                      ? "award"
+                      : "activity"
+                  }
+                  color={
+                    m.label.toLowerCase().includes("precision")
+                      ? c.accent
+                      : m.label.toLowerCase().includes("recall")
+                      ? c.info
+                      : c.success
+                  }
+                />
+              ))}
+            </View>
+          </FadeIn>
+
+          {/* Ablation study */}
+          {!!data?.ablation?.length && (
+            <FadeIn delay={100}>
+              <T s="eyebrow" style={{ marginBottom: 12 }}>
+                ABLATION STUDY
+              </T>
+              <Card>
+                {data.ablation.map((a: any, idx: number) => (
+                  <View
+                    key={a.label}
+                    style={{
+                      marginBottom: idx < data.ablation.length - 1 ? 16 : 0,
+                    }}
+                  >
+                    <View
+                      style={{
+                        flexDirection: "row",
+                        justifyContent: "space-between",
+                        marginBottom: 8,
+                      }}
+                    >
+                      <T s="body" style={{ fontSize: 14 }}>
+                        {a.label}
+                      </T>
+                      <T s="body" style={{ fontWeight: "600", color: c.accent }}>
+                        {a.value}
+                      </T>
+                    </View>
+                    <ProgressBar
+                      progress={Math.min(100, Number(a.value))}
+                      color={
+                        Number(a.value) >= 80
+                          ? c.success
+                          : Number(a.value) >= 50
+                          ? c.warning
+                          : c.danger
+                      }
+                    />
+                  </View>
+                ))}
+              </Card>
+            </FadeIn>
+          )}
+
+          {/* By finding type */}
+          {!!data?.by_type?.length && (
+            <FadeIn delay={200}>
+              <T s="eyebrow" style={{ marginBottom: 12 }}>
+                BY FINDING TYPE
+              </T>
+              <Card>
+                {/* Header row */}
+                <View
+                  style={{
+                    flexDirection: "row",
+                    paddingBottom: 10,
+                    borderBottomWidth: 1,
+                    borderBottomColor: c.line,
+                  }}
+                >
+                  <T s="sub" style={{ flex: 1 }}>
+                    Type
+                  </T>
+                  <T s="sub" style={{ width: 70, textAlign: "center" }}>
+                    Precision
+                  </T>
+                  <T s="sub" style={{ width: 70, textAlign: "center" }}>
+                    Recall
+                  </T>
+                </View>
+                {data.by_type.map((row: any) => (
+                  <View
+                    key={row.type}
+                    style={{
+                      flexDirection: "row",
+                      paddingVertical: 12,
+                      borderBottomWidth: 1,
+                      borderBottomColor: c.line,
+                      alignItems: "center",
+                    }}
+                  >
+                    <T style={{ flex: 1, textTransform: "capitalize" }}>
+                      {row.type}
+                    </T>
+                    <T
+                      s="mono"
+                      style={{ width: 70, textAlign: "center", color: c.accent }}
+                    >
+                      {row.precision}
+                    </T>
+                    <T
+                      s="mono"
+                      style={{ width: 70, textAlign: "center", color: c.info }}
+                    >
+                      {row.recall}
+                    </T>
+                  </View>
+                ))}
+              </Card>
+            </FadeIn>
+          )}
+
+          {!!data?.note && (
+            <T s="sub" style={{ textAlign: "center" }}>
+              {data.note}
+            </T>
+          )}
+        </View>
+      )}
     </Screen>
   );
 }

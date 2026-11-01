@@ -1,32 +1,38 @@
+# Environment secrets
+.env
+.env.*
+*.env
+
 # Node modules (frontend, admin, app)
 **/node_modules/
 **/.next/
 **/.expo/
 
-# Python
+# Python cache & virtual environments
 **/__pycache__/
-**/*.pyc
+**/*.py[cod]
+**/*.so
 **/.venv/
 **/venv/
+**/env/
 
-# Git
+# Git & IDE
 .git/
 .gitignore
-
-# IDE
 .vscode/
 .idea/
 
-# Docs
+# Documentation & tests
 docs/
 *.md
-!backend/requirements.txt
+backend/tests/
+backend/htmlcov/
+backend/.pytest_cache/
 
-# Frontend & App (not needed in backend Docker)
+# Frontend & Mobile packages (not needed in backend container)
 frontend/
 darkspot-admin/
 darkspot-app/
 
 # Misc
 *.log
-.env.example

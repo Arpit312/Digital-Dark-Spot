@@ -1,0 +1,105 @@
+# ==============================================================================
+#  DarkSpot Atlas - Render Blueprint (Docker-Free Native Deployment)
+#  Deploys: FastAPI Backend + Next.js Frontend + Next.js Admin
+#  Usage: Connect GitHub repo → Render auto-detects this file → Deploy All
+# ==============================================================================
+
+services:
+  # ============================================================================
+  # 1. FastAPI Backend (Python Web Service)
+  # ============================================================================
+  - type: web
+    name: darkspot-backend
+    runtime: docker
+    region: frankfurt           # EU region (closest to Supabase eu-west-1)
+    plan: free                  # Change to 'starter' for production
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    envVars:
+      - key: PORT
+        value: "8000"
+      - key: HOST
+        value: "0.0.0.0"
+      - key: WORKERS
+        value: "2"
+      # --- Paste your actual keys in the Render Dashboard (Environment tab) ---
+      - key: GEMINI_API_KEY
+        sync: false             # Will be set manually in Render Dashboard
+      - key: GROQ_API_KEY
+        sync: false
+      - key: TAVILY_API_KEY
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_ANON_KEY
+        sync: false
+      - key: SUPABASE_PUBLISHABLE_KEY
+        sync: false
+      - key: SUPABASE_SECRET_KEY
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: SUPABASE_JWKS_URL
+        sync: false
+      - key: DATABASE_URL
+        sync: false
+      - key: SUPABASE_JWT_SECRET
+        sync: false
+      - key: USE_LOCAL_NLI
+        value: "false"
+      - key: HOST
+        value: "0.0.0.0"
+      - key: CORS_ORIGINS
+        value: "https://darkspot-frontend.onrender.com,https://darkspot-admin.onrender.com,http://localhost:3000,http://localhost:3001"
+    healthCheckPath: /health
+    autoDeploy: true            # Auto-deploy on every git push
+
+  # ============================================================================
+  # 2. Next.js Web Frontend (Static Site - FREE)
+  # ============================================================================
+  - type: web
+    name: darkspot-frontend
+    runtime: node
+    region: frankfurt
+    plan: free
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    startCommand: npm run start
+    envVars:
+      - key: NODE_VERSION
+        value: "20"
+      - key: NODE_ENV
+        value: production
+      - key: NEXT_PUBLIC_API_URL
+        fromService:
+          name: darkspot-backend
+          type: web
+          property: host       # Auto-resolves to backend URL
+      - key: PORT
+        value: "3000"
+    autoDeploy: true
+
+  # ============================================================================
+  # 3. Next.js Admin Console (Web Service)
+  # ============================================================================
+  - type: web
+    name: darkspot-admin
+    runtime: node
+    region: frankfurt
+    plan: free
+    rootDir: darkspot-admin
+    buildCommand: npm install && npm run build
+    startCommand: npm run start
+    envVars:
+      - key: NODE_VERSION
+        value: "20"
+      - key: NODE_ENV
+        value: production
+      - key: NEXT_PUBLIC_API_URL
+        fromService:
+          name: darkspot-backend
+          type: web
+          property: host       # Auto-resolves to backend URL
+      - key: PORT
+        value: "3001"
+    autoDeploy: true

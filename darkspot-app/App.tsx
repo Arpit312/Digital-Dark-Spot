@@ -10,6 +10,7 @@ import { AuthProvider, useAuth } from "./src/auth";
 import { c } from "./src/theme";
 import Onboarding from "./src/screens/Onboarding";
 import { Login, Signup } from "./src/screens/Auth";
+import Home from "./src/screens/Home";
 import Analyze from "./src/screens/Analyze";
 import Progress from "./src/screens/Progress";
 import Report from "./src/screens/Report";
@@ -22,26 +23,92 @@ import Campus from "./src/screens/Campus";
 import Settings from "./src/screens/Settings";
 import Officer from "./src/screens/Officer";
 import Admin from "./src/screens/Admin";
-const Stack = createNativeStackNavigator(), Tab = createBottomTabNavigator();
-const theme = { ...DarkTheme, colors: { ...DarkTheme.colors, background: c.bg, card: c.bg, border: c.line, primary: c.fg, text: c.fg } };
-const icons: any = { Analyze: "search", Reports: "file-text", Watchtower: "bell", Profile: "user" };
+import Support from "./src/screens/Support";
+
+const Stack = createNativeStackNavigator();
+const Tab = createBottomTabNavigator();
+
+const theme = {
+  ...DarkTheme,
+  colors: {
+    ...DarkTheme.colors,
+    background: c.bg,
+    card: c.bg,
+    border: c.line,
+    primary: c.accent,
+    text: c.fg,
+  },
+};
+
+const icons: any = {
+  Home: "home",
+  Analyze: "search",
+  Reports: "file-text",
+  Watchtower: "bell",
+  Profile: "user",
+};
+
 function Tabs() {
-  return <Tab.Navigator screenOptions={({ route }: any) => ({ headerShown: false, tabBarActiveTintColor: c.fg, tabBarInactiveTintColor: c.subtle, tabBarStyle: { backgroundColor: c.bg, borderTopColor: c.line, height: 62, paddingBottom: 8, paddingTop: 6 }, tabBarLabelStyle: { fontSize: 10, fontWeight: "500" }, tabBarIcon: ({ color }: any) => <Feather name={icons[route.name]} size={21} color={color} /> })}>
-    <Tab.Screen name="Analyze" component={Analyze} /><Tab.Screen name="Reports" component={Reports} /><Tab.Screen name="Watchtower" component={Watchtower} /><Tab.Screen name="Profile" component={Profile} /></Tab.Navigator>;
+  return (
+    <Tab.Navigator
+      screenOptions={({ route }: any) => ({
+        headerShown: false,
+        tabBarActiveTintColor: c.accent,
+        tabBarInactiveTintColor: c.subtle,
+        tabBarStyle: {
+          backgroundColor: c.bg,
+          borderTopColor: c.line,
+          borderTopWidth: 1,
+          height: 65,
+          paddingBottom: 10,
+          paddingTop: 6,
+          elevation: 0,
+        },
+        tabBarLabelStyle: {
+          fontSize: 10,
+          fontWeight: "600",
+          letterSpacing: 0.3,
+        },
+        tabBarIcon: ({ color }: any) => (
+          <Feather name={icons[route.name]} size={20} color={color} />
+        ),
+      })}
+    >
+      <Tab.Screen name="Home" component={Home} />
+      <Tab.Screen name="Analyze" component={Analyze} />
+      <Tab.Screen name="Reports" component={Reports} />
+      <Tab.Screen name="Watchtower" component={Watchtower} />
+      <Tab.Screen name="Profile" component={Profile} />
+    </Tab.Navigator>
+  );
 }
+
 function Root() {
   const { user, ready, seen } = useAuth();
+
   if (!ready) {
     return (
-      <View style={{ flex: 1, backgroundColor: c.bg, justifyContent: "center", alignItems: "center" }}>
-        <ActivityIndicator size="large" color={c.fg} />
+      <View
+        style={{
+          flex: 1,
+          backgroundColor: c.bg,
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <ActivityIndicator size="large" color={c.accent} />
       </View>
     );
   }
+
   return (
     <Stack.Navigator
       initialRouteName={user ? "Tabs" : seen ? "Login" : "Onboarding"}
-      screenOptions={{ headerShown: false, animation: "slide_from_right", contentStyle: { backgroundColor: c.bg } }}
+      screenOptions={{
+        headerShown: false,
+        animation: "slide_from_right",
+        contentStyle: { backgroundColor: c.bg },
+      }}
     >
       {user ? (
         <>
@@ -54,6 +121,7 @@ function Root() {
           <Stack.Screen name="Settings" component={Settings} />
           <Stack.Screen name="Officer" component={Officer} />
           <Stack.Screen name="Admin" component={Admin} />
+          <Stack.Screen name="Support" component={Support} />
         </>
       ) : (
         <>
@@ -65,6 +133,16 @@ function Root() {
     </Stack.Navigator>
   );
 }
+
 export default function App() {
-  return <SafeAreaProvider><AuthProvider><NavigationContainer theme={theme}><StatusBar style="light" /><Root /></NavigationContainer></AuthProvider></SafeAreaProvider>;
+  return (
+    <SafeAreaProvider>
+      <AuthProvider>
+        <NavigationContainer theme={theme}>
+          <StatusBar style="light" />
+          <Root />
+        </NavigationContainer>
+      </AuthProvider>
+    </SafeAreaProvider>
+  );
 }

@@ -1,6 +1,6 @@
 # ==============================================================================
-#  DarkSpot Atlas - FastAPI Backend Production Dockerfile
-#  Multi-stage build optimized for security, size, and speed
+#  DarkSpot Atlas - FastAPI Backend Production Dockerfile (Render / Cloud Ready)
+#  Multi-stage build optimized for security, size, memory efficiency, and speed
 # ==============================================================================
 
 # ---------- Stage 1: Builder ----------
@@ -35,31 +35,30 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Copy installed Python packages from builder
 COPY --from=builder /install /usr/local
 
-# Copy application code
-COPY .env .env
+# Copy application backend code (do not copy .env; secrets are injected via Render Dashboard)
 COPY backend/ /app/backend/
+
+# Set proper ownership
+RUN chown -R darkspot:darkspot /app
 
 # Set environment variables
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONPATH=/app \
+    PYTHONPATH=/app:/app/backend \
     PORT=8000 \
     HOST=0.0.0.0
 
-# Expose port
+# Document exposed port (Render automatically routes its internal port to this)
 EXPOSE 8000
 
-# Health check - verifies the API is responsive
-HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
-    CMD curl -f http://localhost:8000/health || exit 1
+# Health check - dynamically uses the PORT assigned by Render or local environment
+HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
+    CMD curl -f http://127.0.0.1:${PORT:-8000}/health || exit 1
 
 # Switch to non-root user
 USER darkspot
 
 # Start the FastAPI server with uvicorn
-CMD ["python", "-m", "uvicorn", "backend.app.main:app", \
-     "--host", "0.0.0.0", \
-     "--port", "8000", \
-     "--workers", "4", \
-     "--timeout-keep-alive", "120", \
-     "--access-log"]
+# Uses sh -c so that $PORT is dynamically evaluated (crucial for Render)
+# Uses exec for proper signal forwarding (graceful shutdown)
+CMD ["sh", "-c", "exec uvicorn backend.app.main:app --host 0.0.0.0 --port ${PORT:-8000} --workers ${WORKERS:-2} --timeout-keep-alive 120 --access-log"]

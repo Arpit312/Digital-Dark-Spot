@@ -1,8 +1,12 @@
+# Environment secrets
+.env
+.env.*
+*.env
+
 # Python
 __pycache__/
-*.pyc
-*.pyo
-*.pyd
+*.py[cod]
+*.so
 .Python
 *.egg-info/
 *.egg
@@ -30,12 +34,9 @@ tests/
 .git/
 .gitignore
 
-# Docker
-Dockerfile
-docker-compose.yml
+# Docker & logs
+Dockerfile*
+docker-compose*.yml
 .dockerignore
-
-# Misc
 *.md
 *.log
-.env.example

@@ -10,11 +10,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     let active = true;
 
-    // Safety timeout: Never leave user on spinning circle for more than 800ms!
-    const timer = setTimeout(() => {
-      if (active) setReady(true);
-    }, 800);
-
     (async () => {
       try {
         const isSeen = await kv.get("seen");
@@ -31,56 +26,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       } catch (err) {
         console.warn("Auth initialization error:", err);
       } finally {
-        if (active) {
-          clearTimeout(timer);
-          setReady(true);
-        }
+        if (active) setReady(true);
       }
     })();
 
     return () => {
       active = false;
-      clearTimeout(timer);
     };
   }, []);
 
   const authed = async (path: string, body: any) => {
-    try {
-      const r = await api(path, { body });
-      const tok = r?.token || r?.access_token || ("token_" + Date.now());
-      await setToken(tok);
-      const u =
-        r?.user ||
-        (await api("/me").catch(() => null)) || {
-          id: "usr_" + Date.now(),
-          email: body.email,
-          user_metadata: { full_name: body.name || body.full_name || body.email.split("@")[0] }
-        };
-      setUser(u);
-    } catch (err: any) {
-      console.warn("Auth request error:", err);
-      const msg = (err?.message || "").toLowerCase();
-      const isNetworkUnreachable =
-        !err.status ||
-        msg.includes("fetch") ||
-        msg.includes("network") ||
-        msg.includes("failed") ||
-        msg.includes("abort") ||
-        msg.includes("timeout");
-
-      if (isNetworkUnreachable) {
-        console.log("Device network unreachable, providing seamless session:", err);
-        const fallbackUser = {
-          id: "usr_offline_" + Date.now(),
-          email: body.email,
-          user_metadata: { full_name: body.name || body.full_name || body.email.split("@")[0] }
-        };
-        await setToken("offline_token_" + Date.now());
-        setUser(fallbackUser);
-        return;
+    const response = await api<any>(path, { body });
+    const accessToken = response?.access_token || response?.token;
+    if (!accessToken) {
+      if (path === "/auth/signup" && response?.user) {
+        throw new Error("Check your email to confirm your account, then sign in.");
       }
-      throw err;
+      throw new Error("The authentication service did not return a valid session.");
     }
+    await setToken(accessToken);
+    const currentUser = response.user || (await api("/me"));
+    setUser(currentUser);
   };
 
   return (

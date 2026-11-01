@@ -356,6 +356,16 @@ ANALYSES_STORE: dict = {
     "demo": REAL_DEMO_ANALYSIS
 }
 
+@app.get("/")
+def root():
+    return {
+        "status": "online",
+        "service": "DarkSpot Atlas API",
+        "version": "1.0.0",
+        "health": "/health",
+        "docs": "/docs"
+    }
+
 @app.get("/health")
 def health_check():
     return {"status": "ok", "service": "DarkSpot Atlas API", "version": "1.0.0"}
