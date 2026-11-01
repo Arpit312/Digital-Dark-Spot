@@ -188,9 +188,20 @@ function Form({ signup, navigation }: any) {
             {!signup && (
               <View style={{ flexDirection: "row", gap: 8, marginTop: 4 }}>
                 <Pressable
-                  onPress={() => {
-                    setEmail("demo123@gmai.com");
-                    setPw("demo123");
+                  onPress={async () => {
+                    const e = "demo123@gmail.com";
+                    const p = "demo123";
+                    setEmail(e);
+                    setPw(p);
+                    setBusy(true);
+                    setErr("");
+                    try {
+                      await login(e, p);
+                    } catch (err: any) {
+                      setErr(err.message || "Login failed");
+                    } finally {
+                      setBusy(false);
+                    }
                   }}
                   style={{
                     flex: 1,
@@ -206,9 +217,20 @@ function Form({ signup, navigation }: any) {
                   <T s="sub" style={{ color: c.accent, fontWeight: "600" }}>Demo Citizen</T>
                 </Pressable>
                 <Pressable
-                  onPress={() => {
-                    setEmail("admin@darkspotatlas.org");
-                    setPw("admin123");
+                  onPress={async () => {
+                    const e = "admin@darkspotatlas.org";
+                    const p = "admin123";
+                    setEmail(e);
+                    setPw(p);
+                    setBusy(true);
+                    setErr("");
+                    try {
+                      await login(e, p);
+                    } catch (err: any) {
+                      setErr(err.message || "Login failed");
+                    } finally {
+                      setBusy(false);
+                    }
                   }}
                   style={{
                     flex: 1,
