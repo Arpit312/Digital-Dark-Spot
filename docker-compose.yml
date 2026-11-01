@@ -1,13 +1,13 @@
 # ==============================================================================
-#  DarkSpot Atlas - Docker Compose Production Stack
-#  Orchestrates: FastAPI Backend + Health Monitoring
+#  DarkSpot Atlas - Full Production Docker Compose Stack
+#  Orchestrates: FastAPI Backend + Next.js Web + Next.js Admin Console
 # ==============================================================================
 
 version: "3.9"
 
 services:
   # ============================================================================
-  # FastAPI Backend API Server
+  # 1. FastAPI Multi-Agent Backend API Server (Port 8000)
   # ============================================================================
   backend:
     build:
@@ -41,6 +41,50 @@ services:
         reservations:
           memory: 256M
           cpus: "0.25"
+
+  # ============================================================================
+  # 2. Next.js Web Frontend (Port 3000)
+  # ============================================================================
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: http://localhost:8000
+    container_name: darkspot-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
+      - NODE_ENV=production
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - darkspot-net
+
+  # ============================================================================
+  # 3. Next.js Admin Management Console (Port 3001)
+  # ============================================================================
+  admin:
+    build:
+      context: ./darkspot-admin
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: http://localhost:8000
+    container_name: darkspot-admin
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
+      - NODE_ENV=production
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - darkspot-net
 
 volumes:
   backend-logs:

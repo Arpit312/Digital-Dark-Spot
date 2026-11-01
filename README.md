@@ -44,56 +44,71 @@ DarkSpot Atlas uses the **L3 Missing Line** geometric identity representing text
 
 ---
 
-## 🏗️ End-to-End Architecture
+## 🔑 System Access & Demo Credentials
+
+DarkSpot Atlas provides unified role-based authentication across all platforms. Use the verified pre-configured credentials below:
+
+| Portal | URL / App | Role | Email | Password |
+| :--- | :--- | :--- | :--- | :--- |
+| **Admin Management Console** | `http://localhost:3001` | `admin` | `admin@darkspotatlas.org` | `admin123` |
+| **Citizen Web Portal** | `http://localhost:3000` | `citizen` | `demo123@gmai.com` | `demo123` |
+| **Mobile App (iOS / Android)** | `darkspot-app` (Expo) | `citizen` / `admin` | Quick Demo Buttons on Sign-in | Auto-filled |
+
+> **Note:** All three applications connect to the same FastAPI backend (`http://127.0.0.1:8000`) and live Supabase PostgreSQL database. Changes made in the Admin Console (verifications, support ticket resolution, feature flags) update in real-time across the website and mobile app.
+
+---
+
+## 🏗️ End-to-End Multi-Client Architecture
 
 ```
-                               ┌────────────────────────────────┐
-                               │   Next.js 14 Web Frontend      │
-                               │  (OLED UI, SSE Live Pipeline)   │
-                               └───────────────┬────────────────┘
-                                               │
-                                  HTTP / SSE   │ (port 8000)
-                                               ▼
-                               ┌────────────────────────────────┐
-                               │       FastAPI Backend API      │
-                               │     (Orchestrator Engine)      │
-                               └───────────────┬────────────────┘
-                                               │
-        ┌──────────────────────────────────────┼──────────────────────────────────────┐
-        ▼                                      ▼                                      ▼
-┌──────────────────┐                 ┌──────────────────┐                   ┌──────────────────┐
-│   Source Scout   │                 │ Claim Extractor  │                   │ Supabase Cloud   │
-│ • Live Web Search│                 │ • Verbatim Quote │                   │ • PostgreSQL DB  │
-│   (Tavily API)   │                 │   Gating (>=90%) │                   │ • JWKS JWT Auth  │
-│ • PyMuPDF Parser │                 │ • Deterministic  │                   │ • 14 Live Tables │
-│ • Portal Ingest  │                 │   Normalization  │                   │ • Row Level Sec  │
-└──────────────────┘                 └────────┬─────────┘                   └──────────────────┘
-                                              │
-                      ┌───────────────────────┼───────────────────────┐
-                      ▼                       ▼                       ▼
-            ┌──────────────────┐    ┌──────────────────┐    ┌──────────────────┐
-            │ Conflict Detector│    │    Gap Finder    │    │ Freshness Radar  │
-            │ (Deterministic)  │    │ (Coverage & DSI) │    │ (Decay & Expiry) │
-            └─────────┬────────┘    └─────────┬────────┘    └─────────┬────────┘
-                      └───────────────────────┼───────────────────────┘
-                                              ▼
-                                     ┌──────────────────┐
-                                     │ Challenger Agent │ (Adversarial Log-Odds Check)
-                                     └────────┬─────────┘
-                                              ▼
-                                     ┌──────────────────┐
-                                     │ Evidence Auditor │ (No quote => Abstain Gate)
-                                     └────────┬─────────┘
-                                              ▼
-                                     ┌──────────────────┐
-                                     │   Verify-Next    │ (Priority Scoring + MMR)
-                                     │     Planner      │
-                                     └────────┬─────────┘
-                                              ▼
-                                     ┌──────────────────┐
-                                     │ Audit Report &   │
-                                     │ Action Checklist │
-                                     └──────────────────┘
+ ┌────────────────────────┐  ┌─────────────────────────┐  ┌────────────────────────┐
+ │   Next.js 14 Web       │  │  React Native / Expo    │  │  Next.js 15 Admin      │
+ │   Citizen Portal       │  │  Mobile App (iOS/Android)│ │  Management Console    │
+ │   (:3000)              │  │  (:8081 / Expo Go)      │  │  (:3001)               │
+ └───────────┬────────────┘  └────────────┬────────────┘  └───────────┬────────────┘
+             │                            │                           │
+             └──────────────────────┐     │     ┌─────────────────────┘
+                                    ▼     ▼     ▼
+                        ┌───────────────────────────────┐
+                        │      FastAPI Backend API      │
+                        │    (Port 8000 / Uvicorn)      │
+                        └───────────────┬───────────────┘
+                                        │
+         ┌──────────────────────────────┼──────────────────────────────┐
+         ▼                              ▼                              ▼
+ ┌──────────────────┐         ┌──────────────────┐           ┌──────────────────┐
+ │   Source Scout   │         │ Claim Extractor  │           │ Supabase Cloud   │
+ │ • Live Web Search│         │ • Verbatim Quote │           │ • PostgreSQL DB  │
+ │   (Tavily API)   │         │   Gating (>=90%) │           │ • JWKS JWT Auth  │
+ │ • PyMuPDF Parser │         │ • Deterministic  │           │ • 18 Live Tables │
+ │ • Portal Ingest  │         │   Normalization  │           │ • Row Level Sec  │
+ └──────────────────┘         └────────┬─────────┘           └──────────────────┘
+                                       │
+               ┌───────────────────────┼───────────────────────┐
+               ▼                       ▼                       ▼
+     ┌──────────────────┐    ┌──────────────────┐    ┌──────────────────┐
+     │ Conflict Detector│    │    Gap Finder    │    │ Freshness Radar  │
+     │ (Deterministic)  │    │ (Coverage & DSI) │    │ (Decay & Expiry) │
+     └─────────┬────────┘    └─────────┬────────┘    └─────────┬────────┘
+               └───────────────────────┼───────────────────────┘
+                                       ▼
+                              ┌──────────────────┐
+                              │ Challenger Agent │ (Adversarial Log-Odds Check)
+                              └────────┬─────────┘
+                                       ▼
+                              ┌──────────────────┐
+                              │ Evidence Auditor │ (No quote => Abstain Gate)
+                              └────────┬─────────┘
+                                       ▼
+                              ┌──────────────────┐
+                              │   Verify-Next    │ (Priority Scoring + MMR)
+                              │     Planner      │
+                              └────────┬─────────┘
+                                       ▼
+                              ┌──────────────────┐
+                              │ Audit Report &   │
+                              │ Action Checklist │
+                              └──────────────────┘
 ```
 
 ---
@@ -225,8 +240,99 @@ Frontend will be live at: **`http://localhost:3000`**
 
 ---
 
+### Step 4: Admin Management Console Setup (Next.js 15)
+
+1. Navigate to the admin directory:
+```bash
+cd darkspot-admin
+```
+
+2. Install dependencies:
+```bash
+npm install
+```
+
+3. Set up environment variables (`darkspot-admin/.env.local`):
+```env
+NEXT_PUBLIC_API_URL=http://localhost:8000
+NEXT_PUBLIC_WEBSITE_URL=http://localhost:3000
+```
+
+4. Start development server:
+```bash
+npm run dev
+```
+Admin Console will be live at: **`http://localhost:3001`**  
+Sign in with: `admin@darkspotatlas.org` / `admin123`
+
+---
+
+### Step 5: Mobile App Setup (React Native / Expo)
+
+1. Navigate to the mobile app directory:
+```bash
+cd darkspot-app
+```
+
+2. Install dependencies:
+```bash
+npm install
+```
+
+3. Configure your local network API URL in `darkspot-app/.env`:
+```env
+EXPO_PUBLIC_API_URL=http://localhost:8000
+```
+*(For physical devices, replace `localhost` with your machine's Wi-Fi IP address, e.g. `http://192.168.1.15:8000`)*
+
+4. Start Expo development server:
+```bash
+npm start
+```
+* Scan the displayed QR code with the **Expo Go** app on your iPhone or Android device, or press `a` for Android Emulator / `w` for Web preview.
+* Quick 1-tap **Demo Citizen** and **Admin Account** buttons are available on the sign-in screen.
+
+---
+
+### Step 6: Docker Full-Stack Deployment (Production Ready)
+
+With Docker installed on your machine, deploy the entire DarkSpot Atlas ecosystem (Backend + Citizen Web + Admin Console) with a single command:
+
+1. **Verify your `.env` file** exists in the project root with your Supabase credentials:
+```env
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_ANON_KEY=your_supabase_anon_key
+SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
+GEMINI_API_KEY=your_gemini_api_key
+PORT=8000
+```
+
+2. **Build and launch the complete stack:**
+```bash
+docker compose up -d --build
+```
+
+3. **Check container health & logs:**
+```bash
+docker compose ps
+docker compose logs -f backend
+```
+
+4. **Access your live services:**
+- **FastAPI Backend:** `http://localhost:8000` (Docs: `http://localhost:8000/docs`)
+- **Citizen Web Portal:** `http://localhost:3000`
+- **Admin Management Console:** `http://localhost:3001`
+
+5. **Stop the stack when needed:**
+```bash
+docker compose down
+```
+
+---
+
 ## 📡 Core API Endpoints
 
+### Citizen & Analysis APIs
 | Method | Endpoint | Description |
 | :--- | :--- | :--- |
 | `GET` | `/health` | Health check & service status |
@@ -238,7 +344,23 @@ Frontend will be live at: **`http://localhost:3000`**
 | `POST` | `/sources/upload` | Upload circular/guideline PDF with PyMuPDF text chunk extraction |
 | `POST` | `/auth/signup` | Registers new user via Supabase Auth |
 | `POST` | `/auth/login` | Authenticates user with Supabase Auth and returns JWT token |
-| `GET` | `/auth/me` | Validates JWT token and returns authenticated user profile |
+| `GET` | `/me` | Returns current authenticated user profile |
+| `POST` | `/support/ticket` | Creates user support ticket tagged with source (`web` or `app`) |
+| `GET` | `/support/tickets` | Lists user's submitted support triage tickets |
+
+### Admin & Management APIs (Admin Auth Required)
+| Method | Endpoint | Description |
+| :--- | :--- | :--- |
+| `GET` | `/admin/stats` | Aggregated real KPI metrics (Total Users, Analyses, Tickets, Sources) |
+| `GET` | `/admin/timeseries?range=7d` | Audit activity trends over time |
+| `GET` | `/admin/health` | Multi-service health monitoring (Supabase, LLM, Tavily) |
+| `GET` | `/admin/users` | List registered user profiles with search and role filters |
+| `PATCH`| `/admin/users/{id}` | Update user roles (`admin`, `citizen`, `officer`) or suspend access |
+| `GET` | `/admin/verifications` | Officer verification request queue |
+| `POST` | `/admin/verifications/{id}/approve` | Approve institutional officer status |
+| `GET` | `/admin/sources` | Trust-scored domain whitelist & authority tiers |
+| `GET` | `/admin/agents` | Live telemetry for all 8 analysis agents (runs, latency, error rate) |
+| `GET` | `/admin/flags` | Live system feature toggles (Campus mode, Live search, SSE) |
 
 ---
 
@@ -248,7 +370,7 @@ Frontend will be live at: **`http://localhost:3000`**
 Digital-Dark-Spot/
 ├── backend/
 │   ├── app/
-│   │   ├── main.py            # FastAPI entry point, CORS, Auth & Analysis routes
+│   │   ├── main.py            # FastAPI entry point, CORS, Auth, Admin & Analysis routes
 │   │   ├── config.py          # Environment settings loader
 │   │   ├── auth.py            # Supabase JWKS authentication service
 │   │   ├── db.py              # Supabase PostgreSQL native REST client
@@ -257,37 +379,38 @@ Digital-Dark-Spot/
 │   │   ├── models/            # PyTorch Confidence Net & ML calibrations
 │   │   ├── templates/         # Domain schemas (scholarship.json, scheme.json, admission.json)
 │   │   └── llm/               # Gemini 2.5 Flash + Groq fallback client
-│   ├── tests/                 # End-to-end verification suites
+│   ├── tests/                 # End-to-end verification suites (verify_backend.py: 49/53 passed)
 │   ├── requirements.txt       # Python dependencies
-│   ├── schema.sql             # Supabase PostgreSQL schema with 14 verified tables
+│   ├── schema.sql             # Supabase PostgreSQL schema with 18 verified tables
 │   ├── run_migration.py       # Automated Supabase database migration runner
 │   └── check_connections.py   # Complete system connectivity diagnostic tool
-├── frontend/
-│   ├── app/
-│   │   ├── page.tsx           # Landing page with L3 brand watermark & animated ticker
-│   │   ├── analyze/page.tsx   # Live multi-agent analysis page (PDF dropzone, Tavily search)
-│   │   ├── report/[id]/       # Dynamic report page with evidence drawer & checklist
-│   │   ├── reports/page.tsx   # Reports archive dashboard
-│   │   ├── login/page.tsx     # Supabase Auth sign-in
-│   │   ├── signup/page.tsx    # Supabase Auth registration
-│   │   ├── watchtower/        # Change detection radar
-│   │   ├── campus/            # College notices auditor
-│   │   └── officer/           # Consistency auditor console
-│   ├── components/
-│   │   ├── Logo.tsx           # L3 Missing Line geometric mark
-│   │   ├── Navbar.tsx         # Navigation bar with auth state & Command Palette
-│   │   ├── Footer.tsx         # Global footer
-│   │   └── ui.tsx             # Design system components
-│   ├── lib/
-│   │   ├── api.ts             # API client, SSE stream reader, and auth methods
-│   │   └── sample.ts          # Real verified NSP audit dataset
-│   ├── package.json           # Frontend dependencies & scripts
-│   ├── tailwind.config.ts     # OLED Midnight theme configuration
-│   └── tsconfig.json          # TypeScript configuration
-├── docs/                      # Original Blueprints, UI Design System, and Project Plans
+├── frontend/                  # Next.js 14 Citizen Web Portal (Port 3000)
+│   ├── app/                   # App Router pages (analyze, report, watchtower, campus, officer)
+│   ├── components/            # OLED Midnight design system & L3 Logo
+│   ├── lib/                   # API client, SSE stream reader, and auth methods
+│   ├── Dockerfile             # Production container definition
+│   └── package.json           # Dependencies & build scripts
+├── darkspot-admin/            # Next.js 15 Admin Management Console (Port 3001)
+│   ├── app/                   # Admin pages (KPIs, Support queue, Users, Verifications, AI review)
+│   ├── components/            # Smooth telemetry charts, Command palette (Ctrl+K), AI Copilot (Ctrl+J)
+│   ├── lib/                   # Admin API client with zero-flicker localStorage cache
+│   ├── Dockerfile             # Production container definition
+│   └── package.json           # Dependencies & build scripts
+├── darkspot-app/              # React Native / Expo Mobile App (iOS & Android)
+│   ├── App.tsx                # Bottom tab & stack navigator
+│   ├── src/
+│   │   ├── screens/           # 16 Native screens (Home, Analyze, Report, Reports, Watchtower, Campus, Support, etc.)
+│   │   ├── api.ts             # Resilient API client with SecureStore + fallback caching
+│   │   ├── auth.tsx           # Mobile authentication provider
+│   │   ├── theme.ts           # Midnight OLED mobile color tokens
+│   │   └── ui.tsx             # Polished native UI primitives
+│   ├── app.json               # Expo project configuration
+│   └── package.json           # React Native dependencies
+├── Dockerfile                 # Multi-stage production Dockerfile for FastAPI backend
+├── docker-compose.yml         # Full-stack Docker Compose orchestrator
 ├── .env.example               # Clean environment variables template
-├── .gitignore                 # Secrets & environment protection
-└── README.md                  # Complete project documentation
+├── .gitignore                 # Strict secrets and environment protection
+└── README.md                  # Comprehensive platform documentation
 ```
 
 ---
