@@ -28,6 +28,27 @@ export default function Login() {
             <div className="relative"><input className="input h-11 pr-10" type={show ? "text" : "password"} placeholder="Password" value={p} onChange={(x) => setP(x.target.value)} autoComplete="current-password" required /><button type="button" onClick={() => setShow(!show)} className="absolute right-3 top-3 text-muted" aria-label="Toggle password">{show ? <EyeOff size={16} /> : <Eye size={16} />}</button></div>
             {err && <div className="rounded-lg border border-line-strong px-3 py-2 text-sm text-muted">{err}</div>}
             <button className="btn-primary h-11 w-full" disabled={busy}>{busy ? <Loader2 size={16} className="animate-spin" /> : "Sign in"}</button>
+            <div className="relative flex py-1 items-center justify-center text-xs text-subtle">
+              <span className="px-2 text-muted text-[11px]">OR DEMO DESK</span>
+            </div>
+            <button
+              type="button"
+              onClick={async () => {
+                setBusy(true);
+                setErr("");
+                try {
+                  await login("admin@darkspotatlas.org", "admin123");
+                  r.replace("/");
+                } catch (x: any) {
+                  setErr(x.message);
+                } finally {
+                  setBusy(false);
+                }
+              }}
+              className="btn-ghost h-10 w-full text-xs border border-line-strong hover:bg-surface-2 flex items-center justify-center gap-1.5 transition-colors"
+            >
+              ⚡ 1-Tap Demo Officer Sign In
+            </button>
           </div>
         </motion.form>
       </div>
